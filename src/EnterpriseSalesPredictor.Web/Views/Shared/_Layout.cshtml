@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Enterprise Sales Predictor</title>
+    <link rel="stylesheet" href="~/css/tailwind.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/EnterpriseSalesPredictor.Web.styles.css" asp-append-version="true" />
+</head>
+<body>
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty;
+        var title = ViewData["Title"]?.ToString() ?? currentController;
+
+        string NavClass(string controller)
+        {
+            return currentController.Equals(controller, StringComparison.OrdinalIgnoreCase) ? "app-nav-link app-nav-link-active" : "app-nav-link";
+        }
+
+        string NotificationClass()
+        {
+            return string.IsNullOrWhiteSpace(TempData["ErrorMessage"] as string) ? "app-notification app-notification-success" : "app-notification app-notification-error";
+        }
+
+        var notificationMessage = TempData["StatusMessage"] as string ?? TempData["ErrorMessage"] as string;
+    }
+
+    <div class="app-shell">
+        <aside class="app-sidebar">
+            <div class="app-brand-block">
+                <div class="app-brand">Enterprise Sales Predictor</div>
+                <div class="app-brand-subtitle">Commercial intelligence platform</div>
+            </div>
+
+            <nav class="app-nav">
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <a class="@NavClass("Home")" asp-area="" asp-controller="Home" asp-action="Index">Dashboard</a>
+                    <a class="@NavClass("Home")" asp-area="" asp-controller="Home" asp-action="Privacy">Platform Notes</a>
+                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "users:read" || claim.Value == "*")))
+                    {
+                        <a class="@NavClass("AccessManagement")" asp-area="" asp-controller="AccessManagement" asp-action="Index">Access Management</a>
+                    }
+
+                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "uploads:read" || claim.Value == "*")))
+                    {
+                        <a class="@NavClass("Uploads")" asp-area="" asp-controller="Uploads" asp-action="Index">Uploads</a>
+                    }
+
+                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "audit:read" || claim.Value == "*")))
+                    {
+                        <a class="@NavClass("Audit")" asp-area="" asp-controller="Audit" asp-action="Index">Audit</a>
+                    }
+
+                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "sales:read" || claim.Value == "*")))
+                    {
+                        <a class="@NavClass("Sales")" asp-area="" asp-controller="Sales" asp-action="Index">Sales Query</a>
+                    }
+
+                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "reports:read" || claim.Value == "*")))
+                    {
+                        <a class="@NavClass("Reports")" asp-area="" asp-controller="Reports" asp-action="Index">Reports</a>
+                    }
+
+                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "forecasts:write" || claim.Value == "*")))
+                    {
+                        <a class="@NavClass("Forecasts")" asp-area="" asp-controller="Forecasts" asp-action="Index">Forecasts</a>
+                    }
+
+                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "replenishment:read" || claim.Value == "*")))
+                    {
+                        <a class="@NavClass("Replenishment")" asp-area="" asp-controller="Replenishment" asp-action="Index">Replenishment</a>
+                    }
+                }
+            </nav>
+
+            <footer class="app-sidebar-footer">
+                <small>Clean Architecture | Razor + API</small>
+            </footer>
+        </aside>
+
+        <div class="app-content">
+            <header class="app-header">
+                <div>
+                    <div class="app-header-kicker">Enterprise Workspace</div>
+                    <div class="app-header-title">@title</div>
+                </div>
+
+                <div class="app-header-actions">
+                    @if (User.Identity?.IsAuthenticated ?? false)
+                    {
+                        <div class="app-user-chip">@User.Identity?.Name</div>
+                        <form asp-controller="Auth" asp-action="Logout" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="link-button">Logout</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a asp-controller="Auth" asp-action="Login">Login</a>
+                    }
+                </div>
+            </header>
+
+            <div class="app-subheader">
+                <nav class="app-breadcrumbs" aria-label="Breadcrumb">
+                    <a asp-controller="Home" asp-action="Index">Home</a>
+                    <span>/</span>
+                    <span>@currentController</span>
+                    @if (!currentAction.Equals("Index", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <span>/</span>
+                        <span>@currentAction</span>
+                    }
+                </nav>
+
+                @if (!string.IsNullOrWhiteSpace(notificationMessage))
+                {
+                    <div class="@NotificationClass()">@notificationMessage</div>
+                }
+            </div>
+
+            <main role="main" class="page-content">
+                @RenderBody()
+            </main>
+
+            <footer class="app-footer">
+                <span>Enterprise Sales Predictor</span>
+                <span>Operational analytics, forecasting, and replenishment</span>
+            </footer>
+        </div>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/utils/dom.js" asp-append-version="true"></script>
+    <script src="~/js/utils/http.js" asp-append-version="true"></script>
+    <script src="~/js/modules/state-panels.js" asp-append-version="true"></script>
+    <script src="~/js/modules/downloads.js" asp-append-version="true"></script>
+    <script src="~/js/modules/chart-bars.js" asp-append-version="true"></script>
+    <script src="~/js/modules/table-renderer.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

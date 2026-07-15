@@ -1,0 +1,32 @@
+@model IReadOnlyCollection<EnterpriseSalesPredictor.Web.ViewModels.Audit.AuditLogItemViewModel>
+
+@if (Model.Count == 0)
+{
+    <p>No audit entries found for this section.</p>
+}
+else
+{
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Occurred At (UTC)</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Module</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var entry in Model)
+        {
+            <tr>
+                <td>@entry.OccurredAtUtc.ToString("u")</td>
+                <td>@entry.Actor</td>
+                <td>@entry.Action</td>
+                <td>@entry.Module</td>
+                <td>@entry.Details</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

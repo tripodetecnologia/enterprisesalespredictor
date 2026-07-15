@@ -1,0 +1,12 @@
+@model EnterpriseSalesPredictor.Web.ViewModels.Shared.ModalViewModel
+
+<dialog id="@Model.Id" class="app-modal">
+    <div class="app-modal-card">
+        <h3>@Model.Title</h3>
+        <p>@Model.Message</p>
+        <div class="app-modal-actions">
+            <button type="button" class="button button-secondary" data-modal-cancel="@Model.Id">@Model.CancelLabel</button>
+            <button type="button" class="button" data-modal-confirm="@Model.Id">@Model.ConfirmLabel</button>
+        </div>
+    </div>
+</dialog>

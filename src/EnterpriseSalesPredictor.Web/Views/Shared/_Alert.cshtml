@@ -1,0 +1,9 @@
+@model EnterpriseSalesPredictor.Web.ViewModels.Shared.AlertViewModel
+
+<div class="app-alert app-alert-@Model.Variant.ToLowerInvariant()" role="status">
+    @if (!string.IsNullOrWhiteSpace(Model.Title))
+    {
+        <strong>@Model.Title</strong>
+    }
+    <span>@Model.Message</span>
+</div>

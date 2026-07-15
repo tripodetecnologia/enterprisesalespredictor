@@ -1,0 +1,59 @@
+@model EnterpriseSalesPredictor.Web.ViewModels.Replenishment.ReplenishmentDetailPageViewModel
+
+@{
+    ViewData["Title"] = "Recommendation Detail";
+}
+
+<section class="hero">
+    <h1>Recommendation Detail</h1>
+    <p><a asp-action="Index">Back to recommendations</a></p>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="status-ok">@Model.StatusMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="auth-error">@Model.ErrorMessage</div>
+    }
+</section>
+
+<section class="hero dashboard-grid">
+    <article>
+        <h2>Recommendation Summary</h2>
+        <p><strong>Status:</strong> <span class="status-pill status-pill-@Model.Recommendation.Status.ToLowerInvariant()">@Model.Recommendation.Status</span></p>
+        <p><strong>Product Id:</strong> @Model.Recommendation.ProductId</p>
+        <p><strong>Generated At:</strong> @Model.Recommendation.GeneratedAtUtc.ToString("u")</p>
+        <p><strong>Recommended Units:</strong> @Model.Recommendation.RecommendedUnits.ToString("N2")</p>
+        <p><strong>Confidence:</strong> @Model.Recommendation.Confidence.ToString("P0")</p>
+        <p><strong>Rationale:</strong> @Model.Recommendation.Rationale</p>
+        <p><strong>Reviewed By:</strong> @(Model.Recommendation.ReviewedBy ?? "Pending")</p>
+        <p><strong>Reviewed At:</strong> @(Model.Recommendation.ReviewedAtUtc?.ToString("u") ?? "Pending")</p>
+        <p><strong>Review Notes:</strong> @(Model.Recommendation.ReviewNotes ?? "No notes recorded")</p>
+    </article>
+
+    <article>
+        <h2>Review Actions</h2>
+        <form asp-action="Review" method="post" class="auth-form">
+            @Html.AntiForgeryToken()
+            <input asp-for="ReviewForm.RecommendationId" type="hidden" />
+
+            <div class="form-group">
+                <label asp-for="ReviewForm.Action">Action</label>
+                <select asp-for="ReviewForm.Action">
+                    <option value="approve">Approve</option>
+                    <option value="reject">Reject</option>
+                    <option value="analysis">Mark for analysis</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ReviewForm.Notes">Notes</label>
+                <input asp-for="ReviewForm.Notes" />
+            </div>
+
+            <button type="submit">Submit review</button>
+        </form>
+    </article>
+</section>

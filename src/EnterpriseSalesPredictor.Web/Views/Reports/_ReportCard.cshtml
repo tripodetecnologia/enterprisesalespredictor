@@ -1,0 +1,29 @@
+@model EnterpriseSalesPredictor.Web.ViewModels.Reports.ReportViewModel
+
+<article class="hero report-card">
+    <h2>@Model.Title</h2>
+    <p>Generated at @Model.GeneratedAtUtc.ToString("u")</p>
+
+    @if (Model.Sections.Count == 0)
+    {
+        <p>No sections available.</p>
+    }
+    else
+    {
+        foreach (var sectionModel in Model.Sections)
+        {
+            <section class="report-section">
+                <h3>@sectionModel.Title</h3>
+                <div class="report-metrics-grid">
+                    @foreach (var metric in sectionModel.Metrics)
+                    {
+                        <div class="report-metric-item">
+                            <span class="report-metric-label">@metric.Label</span>
+                            <strong class="report-metric-value">@metric.Value</strong>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    }
+</article>

@@ -1,0 +1,124 @@
+@model EnterpriseSalesPredictor.Web.ViewModels.Access.AccessManagementPageViewModel
+
+@{
+    ViewData["Title"] = "Access Management";
+}
+
+<section class="hero">
+    <h1>Access Management</h1>
+    <p>Manage users, roles and permissions for the platform.</p>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="status-ok">@Model.StatusMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="auth-error">@Model.ErrorMessage</div>
+    }
+</section>
+
+<section class="hero access-grid">
+    <div>
+        <h2>Users</h2>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Permissions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var user in Model.Users)
+            {
+                <tr>
+                    <td>@user.Username</td>
+                    <td>@user.Role</td>
+                    <td>@string.Join(", ", user.Permissions)</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <h2>Create User</h2>
+        <form asp-action="CreateUser" method="post" class="auth-form">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label asp-for="CreateUserForm.Username"></label>
+                <input asp-for="CreateUserForm.Username" />
+                <span asp-validation-for="CreateUserForm.Username" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CreateUserForm.Password"></label>
+                <input asp-for="CreateUserForm.Password" />
+                <span asp-validation-for="CreateUserForm.Password" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CreateUserForm.Role"></label>
+                <input asp-for="CreateUserForm.Role" />
+                <span asp-validation-for="CreateUserForm.Role" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label>Permissions (comma separated)</label>
+                <input asp-for="CreateUserForm.PermissionsRaw" />
+            </div>
+
+            <button type="submit">Create user</button>
+        </form>
+    </div>
+</section>
+
+<section class="hero">
+    <h2>Roles and Permissions</h2>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Role</th>
+                <th>Permissions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var role in Model.Roles)
+        {
+            <tr>
+                <td>@role.Role</td>
+                <td>@string.Join(", ", role.Permissions)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <h3>Update Role Permissions</h3>
+    <form asp-action="UpdateRolePermissions" method="post" class="auth-form">
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            <label asp-for="UpdateRoleForm.Role"></label>
+            <input asp-for="UpdateRoleForm.Role" />
+            <span asp-validation-for="UpdateRoleForm.Role" class="field-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Permissions (comma separated)</label>
+            <input asp-for="UpdateRoleForm.PermissionsRaw" />
+        </div>
+
+        <button type="submit">Update role</button>
+    </form>
+
+    <h3>Permission Catalog</h3>
+    <p>@string.Join(", ", Model.PermissionCatalog)</p>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

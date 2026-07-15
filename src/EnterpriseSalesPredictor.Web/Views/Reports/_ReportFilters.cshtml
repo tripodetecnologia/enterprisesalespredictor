@@ -1,0 +1,15 @@
+@model EnterpriseSalesPredictor.Web.ViewModels.Reports.ReportFiltersViewModel
+
+<form method="get" class="audit-filters">
+    <div class="form-group">
+        <label asp-for="FromDate">From</label>
+        <input asp-for="FromDate" type="date" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ToDate">To</label>
+        <input asp-for="ToDate" type="date" />
+    </div>
+
+    <button type="submit">Apply filters</button>
+</form>

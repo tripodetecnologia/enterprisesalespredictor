@@ -1,0 +1,71 @@
+@model EnterpriseSalesPredictor.Web.ViewModels.Replenishment.ReplenishmentPageViewModel
+
+@{
+    ViewData["Title"] = "Replenishment Recommendations";
+}
+
+<section class="hero">
+    <h1>Replenishment Recommendations</h1>
+    <p>Generate and review stock replenishment recommendations with controlled approval workflow.</p>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="status-ok">@Model.StatusMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="auth-error">@Model.ErrorMessage</div>
+    }
+
+    <form asp-action="Generate" method="post" class="auth-form">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label asp-for="GenerateForm.ProductId">Product Id</label>
+            <input asp-for="GenerateForm.ProductId" />
+            <span asp-validation-for="GenerateForm.ProductId" class="field-error"></span>
+        </div>
+        <button type="submit">Generate recommendation</button>
+    </form>
+</section>
+
+<section class="hero">
+    <h2>Current Recommendations</h2>
+
+    @if (Model.Recommendations.Count == 0)
+    {
+        <p>No recommendations have been generated yet.</p>
+    }
+    else
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Generated At</th>
+                    <th>Product Id</th>
+                    <th>Recommended Units</th>
+                    <th>Confidence</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Recommendations)
+            {
+                <tr>
+                    <td>@item.GeneratedAtUtc.ToString("u")</td>
+                    <td>@item.ProductId</td>
+                    <td>@item.RecommendedUnits.ToString("N2")</td>
+                    <td>@item.Confidence.ToString("P0")</td>
+                    <td><span class="status-pill status-pill-@item.Status.ToLowerInvariant()">@item.Status</span></td>
+                    <td><a asp-action="Detail" asp-route-id="@item.Id">Review details</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

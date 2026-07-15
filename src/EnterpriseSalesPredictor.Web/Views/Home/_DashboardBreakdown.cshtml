@@ -1,0 +1,27 @@
+@model IReadOnlyCollection<EnterpriseSalesPredictor.Web.ViewModels.Dashboard.DashboardBreakdownItemViewModel>
+
+@if (Model.Count == 0)
+{
+    <p>No data available.</p>
+}
+else
+{
+    var maxAmount = Model.Max(item => item.TotalSalesAmount);
+
+    <div class="dashboard-breakdown-list">
+        @foreach (var item in Model)
+        {
+            var width = maxAmount <= 0m ? 0m : Math.Round((item.TotalSalesAmount / maxAmount) * 100m, 2);
+            <div class="dashboard-breakdown-item">
+                <div class="dashboard-breakdown-header">
+                    <span>@item.Label</span>
+                    <strong>@item.TotalSalesAmount.ToString("N2")</strong>
+                </div>
+                <div class="dashboard-breakdown-bar-track">
+                    <div class="dashboard-breakdown-bar-fill" style="width: @(width.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                </div>
+                <small>@item.TotalTransactions transactions | @item.TotalQuantity.ToString("N2") units</small>
+            </div>
+        }
+    </div>
+}

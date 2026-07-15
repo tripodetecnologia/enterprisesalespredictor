@@ -1,0 +1,43 @@
+@model IReadOnlyCollection<EnterpriseSalesPredictor.Web.ViewModels.Uploads.UploadErrorViewModel>
+
+@{
+    ViewData["Title"] = "Upload Error Details";
+    var uploadId = (Guid?)ViewData["UploadId"];
+}
+
+<section class="hero">
+    <h1>Upload error details</h1>
+    <p>Upload Id: <strong>@uploadId</strong></p>
+    <p>
+        <a asp-action="Index">Back to uploads</a>
+    </p>
+</section>
+
+<section class="hero">
+    @if (Model.Count == 0)
+    {
+        <p>No errors were registered for this upload.</p>
+    }
+    else
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>Field</th>
+                    <th>Error</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var error in Model)
+            {
+                <tr>
+                    <td>@error.RowNumber</td>
+                    <td>@error.FieldName</td>
+                    <td>@error.ErrorMessage</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</section>

@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EnterpriseSalesPredictor.Api/EnterpriseSalesPredictor.Api.csproj" />
+    <Project Path="src/EnterpriseSalesPredictor.Application/EnterpriseSalesPredictor.Application.csproj" />
+    <Project Path="src/EnterpriseSalesPredictor.Domain/EnterpriseSalesPredictor.Domain.csproj" />
+    <Project Path="src/EnterpriseSalesPredictor.Infrastructure/EnterpriseSalesPredictor.Infrastructure.csproj" />
+    <Project Path="src/EnterpriseSalesPredictor.Web/EnterpriseSalesPredictor.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EnterpriseSalesPredictor.Tests.Integration/EnterpriseSalesPredictor.Tests.Integration.csproj" />
+    <Project Path="tests/EnterpriseSalesPredictor.Tests.Unit/EnterpriseSalesPredictor.Tests.Unit.csproj" />
+  </Folder>
+</Solution>

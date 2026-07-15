@@ -1,0 +1,6 @@
+@EnterpriseSalesPredictor.Api_HostAddress = http://localhost:5150
+
+GET {{EnterpriseSalesPredictor.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

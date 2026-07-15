@@ -1,0 +1,35 @@
+@model EnterpriseSalesPredictor.Web.ViewModels.Reports.ReportsPageViewModel
+
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<section class="hero">
+    <h1>Enterprise Reports</h1>
+    <p>Review management, commercial, operational, replenishment, and predictive reports from a single screen.</p>
+    <div class="filter-panel">
+        <partial name="_ReportFilters" model="Model.Filters" />
+    </div>
+
+    <div class="page-actions">
+        <button type="button" id="reports-export-button" class="button">Export reports workbook</button>
+        <button type="button" id="base-data-export-button" class="button button-secondary">Export base data</button>
+    </div>
+</section>
+
+<section id="reports-export-status" hidden></section>
+
+<section class="dashboard-grid reports-grid">
+    <partial name="_ReportCard" model="Model.ManagementReport" />
+    <partial name="_ReportCard" model="Model.CommercialReport" />
+    <partial name="_ReportCard" model="Model.OperationalReport" />
+    <partial name="_ReportCard" model="Model.ReplenishmentReport" />
+    <partial name="_ReportCard" model="Model.PredictiveReport" />
+</section>
+
+<partial name="_Modal" model='new ModalViewModel { Id = "reports-export-modal", Title = "Export Reports", Message = "Download the current reports workbook?", ConfirmLabel = "Export", CancelLabel = "Cancel" }' />
+<partial name="_Modal" model='new ModalViewModel { Id = "base-data-export-modal", Title = "Export Base Data", Message = "Download the full base data workbook?", ConfirmLabel = "Download", CancelLabel = "Cancel" }' />
+
+@section Scripts {
+    <script src="~/js/pages/reports-index.js" asp-append-version="true"></script>
+}

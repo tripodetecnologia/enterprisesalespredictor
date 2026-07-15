@@ -1,0 +1,78 @@
+schema: spec-driven
+language: es
+
+context: |
+  Proyecto: codigo
+  Estado: bootstrap documental; el workspace todavía no contiene código fuente ni solución .NET implementada.
+  Stack previsto: .NET 8, ASP.NET MVC con Razor, Tailwind CSS y Vanilla JS modular.
+  Arquitectura prevista: Clean Architecture con capas Domain, Application, Infrastructure y Web.
+  Testing previsto: NUnit con Moq; el runner aún no está inicializado en este directorio.
+  Convenciones: código fuente en inglés y artefactos SDD en español.
+  Fuentes de referencia: ../Prompts/1-PromptMaestroRequerimientos.txt, ../Prompts/2-PromptMaestroArquitectura.txt, ../Prompts/3-PromptMaestroDiseno.txt.
+
+testing:
+  strict_tdd: false
+  strict_tdd_reason: "No se detectó un runner ejecutable ni archivos de solución/proyecto en Codigo; NUnit y Moq aparecen solo como convención planificada en los prompts fuente."
+  detected_at: "2026-07-07"
+  runner:
+    available: false
+    framework: "NUnit + Moq (planificado)"
+    command: ""
+  layers:
+    unit:
+      available: false
+      tool: "NUnit + Moq (planificado)"
+    integration:
+      available: false
+      tool: "Pendiente de definir"
+    e2e:
+      available: false
+      tool: "Pendiente de definir"
+  coverage:
+    available: false
+    command: ""
+  quality:
+    linter:
+      available: false
+      command: ""
+    type_checker:
+      available: false
+      command: ""
+    formatter:
+      available: false
+      command: ""
+
+rules:
+  proposal:
+    checklist:
+      - Documentar alcance MVP, supuestos y dependencias con las fuentes de prompt existentes.
+      - Incluir plan de reversión o descarte si una decisión compromete seguridad, datos o mantenibilidad.
+  specs:
+    checklist:
+      - Escribir requisitos y escenarios en español profesional.
+      - Usar escenarios Given/When/Then y vocabulario normativo MUST/SHALL/SHOULD/MAY cuando corresponda.
+  design:
+    checklist:
+      - Mantener alineación explícita con Clean Architecture, CQRS, Result<T> y Unit of Work.
+      - Dejar claro cuándo una decisión proviene de prompts fuente y cuándo proviene de evidencia del repositorio.
+  tasks:
+    checklist:
+      - Agrupar por fase y numerar jerárquicamente.
+      - Mantener tareas pequeñas, verificables y completables en una sola sesión.
+  apply:
+    checklist:
+      - Seguir Clean Architecture y evitar lógica de negocio en controllers, vistas Razor y scripts de página.
+      - Mantener el código fuente en inglés y la documentación/artefactos SDD en español.
+    tdd: false
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 0
+    checklist:
+      - Verificar primero la existencia real de solución, proyectos y runner antes de exigir ejecución automática.
+      - Distinguir evidencia planificada de evidencia ejecutada.
+  archive:
+    checklist:
+      - No archivar cambios sin propuesta, especificación, diseño, tareas y verificación asociadas.
+      - Conservar trazabilidad hacia prompts fuente y decisiones persistidas en Engram.

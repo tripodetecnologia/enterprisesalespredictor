@@ -1,0 +1,116 @@
+@model EnterpriseSalesPredictor.Web.ViewModels.Uploads.UploadPageViewModel
+
+@{
+    ViewData["Title"] = "File Uploads";
+}
+
+<section class="hero">
+    <h1>Sales Data Uploads</h1>
+    <p>Upload Excel or semicolon-delimited files to ingest sales history.</p>
+
+    <ul>
+        <li>Allowed formats: <strong>.xlsx</strong>, <strong>.xls</strong>, <strong>.csv</strong>, <strong>.txt</strong></li>
+        <li>Maximum size: <strong>20 MB</strong></li>
+        <li>Delimiter for flat files: <strong>;</strong></li>
+    </ul>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="status-ok">@Model.StatusMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="auth-error">@Model.ErrorMessage</div>
+    }
+
+    <form asp-action="Upload" method="post" enctype="multipart/form-data" class="auth-form upload-form" id="upload-form">
+        @Html.AntiForgeryToken()
+
+        <div class="upload-dropzone" id="upload-dropzone">
+            <p class="upload-dropzone-title">Drag and drop a file here</p>
+            <p class="upload-dropzone-subtitle">or select one from your computer.</p>
+            <input type="file" name="file" id="upload-file-input" accept=".xlsx,.xls,.csv,.txt" />
+        </div>
+
+        <div class="upload-progress" id="upload-progress" hidden>
+            <div class="upload-progress-bar" id="upload-progress-bar"></div>
+        </div>
+
+        <button type="submit">Process upload</button>
+    </form>
+</section>
+
+@if (Model.LastResult is not null)
+{
+    <section class="hero">
+        <h2>Last processing summary</h2>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Upload Id</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Valid</th>
+                    <th>Invalid</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@Model.LastResult.UploadId</td>
+                    <td>@Model.LastResult.Status</td>
+                    <td>@Model.LastResult.TotalRecords</td>
+                    <td>@Model.LastResult.ValidRecords</td>
+                    <td>@Model.LastResult.InvalidRecords</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+}
+
+<section class="hero">
+    <h2>Upload history</h2>
+
+    @if (Model.Uploads.Count == 0)
+    {
+        <p>No uploads found yet.</p>
+    }
+    else
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Uploaded At (UTC)</th>
+                    <th>File Name</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Valid</th>
+                    <th>Invalid</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var upload in Model.Uploads)
+            {
+                <tr>
+                    <td>@upload.UploadedAtUtc.ToString("u")</td>
+                    <td>@upload.FileName</td>
+                    <td>@upload.FileType</td>
+                    <td>@upload.Status</td>
+                    <td>@upload.TotalRecords</td>
+                    <td>@upload.ValidRecords</td>
+                    <td>@upload.InvalidRecords</td>
+                    <td>
+                        <a asp-action="Errors" asp-route-id="@upload.Id">View errors</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</section>
+
+@section Scripts {
+    <script src="~/js/pages/uploads-index.js" asp-append-version="true"></script>
+}

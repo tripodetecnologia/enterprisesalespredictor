@@ -1,0 +1,82 @@
+@model EnterpriseSalesPredictor.Web.ViewModels.Dashboard.DashboardPageViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="hero">
+    <h1>Executive Dashboard</h1>
+    <p>Track KPIs, commercial alerts, and top-performing entities across the sales operation.</p>
+</section>
+
+<section class="dashboard-kpi-grid">
+    <article class="hero dashboard-kpi-card">
+        <span class="dashboard-kpi-label">Total Sales</span>
+        <strong class="dashboard-kpi-value">@Model.Kpis.TotalSalesAmount.ToString("N2")</strong>
+    </article>
+    <article class="hero dashboard-kpi-card">
+        <span class="dashboard-kpi-label">Units Sold</span>
+        <strong class="dashboard-kpi-value">@Model.Kpis.TotalQuantity.ToString("N2")</strong>
+    </article>
+    <article class="hero dashboard-kpi-card">
+        <span class="dashboard-kpi-label">Transactions</span>
+        <strong class="dashboard-kpi-value">@Model.Kpis.TotalTransactions</strong>
+    </article>
+    <article class="hero dashboard-kpi-card">
+        <span class="dashboard-kpi-label">Average Ticket</span>
+        <strong class="dashboard-kpi-value">@Model.Kpis.AverageTicket.ToString("N2")</strong>
+    </article>
+</section>
+
+<section class="dashboard-grid">
+    <article class="hero">
+        <h2>Top Customers</h2>
+        <partial name="_DashboardBreakdown" model="Model.TopCustomers" />
+    </article>
+
+    <article class="hero">
+        <h2>Top Products</h2>
+        <partial name="_DashboardBreakdown" model="Model.TopProducts" />
+    </article>
+
+    <article class="hero">
+        <h2>Sales by Product Line</h2>
+        <partial name="_DashboardBreakdown" model="Model.SalesByLine" />
+    </article>
+
+    <article class="hero">
+        <h2>Sales by Supplier</h2>
+        <partial name="_DashboardBreakdown" model="Model.SalesBySupplier" />
+    </article>
+</section>
+
+<section class="dashboard-grid">
+    <article class="hero">
+        <h2>Quick Access</h2>
+        <div class="dashboard-quick-links">
+            <a asp-controller="Uploads" asp-action="Index">Review Uploads</a>
+            <a asp-controller="Sales" asp-action="Index">Run Sales Query</a>
+            <a asp-controller="Audit" asp-action="Index">Inspect Audit Trail</a>
+        </div>
+    </article>
+
+    <article class="hero">
+        <h2>Commercial Alerts</h2>
+        @if (Model.Alerts.Count == 0)
+        {
+            <p>No alerts detected for the current data set.</p>
+        }
+        else
+        {
+            <div class="dashboard-alerts">
+                @foreach (var alert in Model.Alerts)
+                {
+                    <div class="dashboard-alert dashboard-alert-@alert.Severity.ToLowerInvariant()">
+                        <strong>@alert.Title</strong>
+                        <p>@alert.Message</p>
+                    </div>
+                }
+            </div>
+        }
+    </article>
+</section>
