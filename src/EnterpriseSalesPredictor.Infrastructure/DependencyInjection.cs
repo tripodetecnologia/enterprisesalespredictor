@@ -61,8 +61,9 @@ public static class DependencyInjection
         services.Configure<AuthSeedOptions>(configuration.GetSection(AuthSeedOptions.SectionName));
 
         services.AddSingleton<ITokenService, JwtTokenService>();
-        services.AddScoped<ICredentialValidator, ConfiguredUserCredentialValidator>();
-        services.AddSingleton<IAccessManagementService, InMemoryAccessManagementService>();
+        services.AddScoped<ISecurityBootstrapper, SecurityBootstrapper>();
+        services.AddScoped<ICredentialValidator, DbCredentialValidator>();
+        services.AddScoped<IAccessManagementService, DbAccessManagementService>();
         services.AddScoped<IUploadService, UploadService>();
         services.AddScoped<IUploadProcessingService, UploadProcessingService>();
         services.AddScoped<IUploadFileParser, ExcelUploadFileParser>();

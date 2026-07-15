@@ -71,6 +71,32 @@ public sealed class ApiIntegrationTests
     }
 
     [Test]
+    public async Task AccessManagement_ShouldPersistCreatedUserAndAllowLogin()
+    {
+        await AuthenticateAsync();
+
+        var createResponse = await _client.PostAsJsonAsync("api/access/users", new
+        {
+            Username = "persistent-user",
+            Password = "Persistent@123",
+            Role = "Supervisor",
+            Permissions = new[] { "sales:read", "reports:read" }
+        });
+
+        Assert.That(createResponse.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+
+        using var loginClient = _factory.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var loginResponse = await loginClient.PostAsJsonAsync("api/auth/login", new { username = "persistent-user", password = "Persistent@123" });
+        var loginPayload = await ParseJsonAsync(loginResponse);
+
+        Assert.That(loginPayload.GetProperty("accessToken").GetString(), Is.Not.Empty);
+    }
+
+    [Test]
     public async Task UploadDelimitedEndpoint_ShouldPersistImportedData()
     {
         await AuthenticateAsync();

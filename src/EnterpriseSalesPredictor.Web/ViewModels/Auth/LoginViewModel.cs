@@ -15,5 +15,5 @@ public sealed class LoginViewModel
 
     public string? ErrorMessage { get; set; }
 
-    public string ReturnUrl { get; set; } = string.Empty;
+    public string? ReturnUrl { get; set; }
 }

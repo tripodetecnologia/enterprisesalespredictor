@@ -39,7 +39,7 @@ public sealed class AccessManagementController : ControllerBase
             Permissions = request.Permissions
         }, cancellationToken);
 
-        return CreatedAtAction(nameof(GetUsersAsync), new { id = user.UserId }, user);
+        return StatusCode(StatusCodes.Status201Created, user);
     }
 
     [HttpGet("roles")]
