@@ -15,7 +15,7 @@ public sealed class SalesReadService : ISalesReadService
         _dbContext = dbContext;
     }
 
-    public async Task<IReadOnlyCollection<SaleDto>> QuerySalesAsync(SalesQueryCriteria criteria, CancellationToken cancellationToken = default)
+    public async Task<PagedSalesResult> QuerySalesAsync(SalesQueryCriteria criteria, CancellationToken cancellationToken = default)
     {
         var query = ApplyFilters(_dbContext.Sales.AsNoTracking(), criteria);
         query = ApplyLocationFilters(query, criteria);
@@ -24,23 +24,42 @@ public sealed class SalesReadService : ISalesReadService
         var pageNumber = NormalizePageNumber(criteria.PageNumber);
         var pageSize = NormalizePageSize(criteria.PageSize);
 
-        return await query
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Join(_dbContext.Customers.AsNoTracking(), sale => sale.CustomerId, customer => customer.Id, (sale, customer) => new { sale, customer })
+            .Join(_dbContext.Products.AsNoTracking(), item => item.sale.ProductId, product => product.Id, (item, product) => new { item.sale, item.customer, product })
+            .Join(_dbContext.Suppliers.AsNoTracking(), item => item.sale.SupplierId, supplier => supplier.Id, (item, supplier) => new { item.sale, item.customer, item.product, supplier })
+            .Join(_dbContext.Sellers.AsNoTracking(), item => item.sale.SellerId, seller => seller.Id, (item, seller) => new { item.sale, item.customer, item.product, item.supplier, seller })
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .Select(sale => new SaleDto
+            .Select(item => new SaleDto
             {
-                Id = sale.Id,
-                InvoiceNumber = sale.InvoiceNumber,
-                CustomerId = sale.CustomerId,
-                ProductId = sale.ProductId,
-                SupplierId = sale.SupplierId,
-                SellerId = sale.SellerId,
-                SaleDate = sale.SaleDate,
-                Quantity = sale.Quantity,
-                SaleAmount = sale.SaleAmount,
-                PaymentMethod = sale.PaymentMethod
+                Id = item.sale.Id,
+                InvoiceNumber = item.sale.InvoiceNumber,
+                CustomerId = item.sale.CustomerId,
+                CustomerName = item.customer.Name,
+                ProductId = item.sale.ProductId,
+                ProductName = item.product.Name,
+                SupplierId = item.sale.SupplierId,
+                SupplierName = item.supplier.Name,
+                SellerId = item.sale.SellerId,
+                SellerName = item.seller.Name,
+                SaleDate = item.sale.SaleDate,
+                Quantity = item.sale.Quantity,
+                SaleAmount = item.sale.SaleAmount,
+                PaymentMethod = item.sale.PaymentMethod
             })
             .ToArrayAsync(cancellationToken);
+
+        return new PagedSalesResult
+        {
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize)
+        };
     }
 
     public async Task<IReadOnlyCollection<SalesDimensionSummaryDto>> GetSalesByCustomerAsync(SalesQueryCriteria criteria, CancellationToken cancellationToken = default)
@@ -284,10 +303,10 @@ public sealed class SalesReadService : ISalesReadService
     {
         if (pageSize <= 0)
         {
-            return 50;
+            return 20;
         }
 
-        return Math.Min(pageSize, 200);
+        return Math.Min(pageSize, 5000);
     }
 
     private static string NormalizePeriod(string period)

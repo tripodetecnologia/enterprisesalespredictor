@@ -1,37 +1,265 @@
 @model EnterpriseSalesPredictor.Web.ViewModels.Auth.LoginViewModel
 
 @{
-    ViewData["Title"] = "Login";
+    Layout = null;
+    ViewData["Title"] = "Inicio de sesión";
 }
 
-<section class="auth-container">
-    <h1>Sign in</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Predictor Empresarial de Ventas</title>
+    <link rel="stylesheet" href="~/css/tailwind.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/EnterpriseSalesPredictor.Web.styles.css" asp-append-version="true" />
+    <style>
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 32%),
+                radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.20), transparent 28%),
+                linear-gradient(135deg, #e2e8f0 0%, #f8fafc 45%, #dbeafe 100%);
+            min-height: 100vh;
+        }
 
-    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-    {
-        <div class="auth-error">@Model.ErrorMessage</div>
-    }
+        .login-shell {
+            align-items: stretch;
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            margin: 0 auto;
+            max-width: 1180px;
+            min-height: 100vh;
+            padding: 32px;
+        }
 
-    <form asp-action="Login" asp-controller="Auth" method="post" class="auth-form">
-        @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="ReturnUrl" />
+        .login-showcase {
+            color: #0f172a;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 28px 28px 28px 8px;
+        }
 
-        <div class="form-group">
-            <label asp-for="Username"></label>
-            <input asp-for="Username" autocomplete="username" />
-            <span asp-validation-for="Username" class="field-error"></span>
-        </div>
+        .login-brand {
+            color: #1d4ed8;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+        }
 
-        <div class="form-group">
-            <label asp-for="Password"></label>
-            <input asp-for="Password" autocomplete="current-password" />
-            <span asp-validation-for="Password" class="field-error"></span>
-        </div>
+        .login-showcase h1 {
+            font-size: clamp(2.4rem, 5vw, 4.2rem);
+            line-height: 1.02;
+            margin: 0;
+            max-width: 9ch;
+        }
 
-        <button type="submit">Login</button>
-    </form>
-</section>
+        .login-showcase p {
+            color: #334155;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-top: 20px;
+            max-width: 56ch;
+        }
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+        .login-metrics {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(3, minmax(120px, 1fr));
+            margin-top: 36px;
+            max-width: 760px;
+        }
+
+        .login-metric {
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            border-radius: 18px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+            padding: 20px;
+        }
+
+        .login-metric strong {
+            color: #0f172a;
+            display: block;
+            font-size: 1.35rem;
+            margin-bottom: 6px;
+        }
+
+        .login-metric span {
+            color: #475569;
+            font-size: 0.92rem;
+        }
+
+        .login-panel-wrap {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+        }
+
+        .login-panel {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            border-radius: 28px;
+            box-shadow: 0 30px 60px rgba(15, 23, 42, 0.12);
+            padding: 34px;
+            width: min(100%, 460px);
+        }
+
+        .login-panel-kicker {
+            color: #64748b;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .login-panel h2 {
+            color: #0f172a;
+            font-size: 2rem;
+            margin: 0 0 10px;
+        }
+
+        .login-panel-copy {
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .login-panel .auth-form {
+            gap: 18px;
+        }
+
+        .login-panel .form-group label {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .login-panel .form-group input {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        .login-submit {
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .login-footer-note {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-top: 22px;
+            text-align: center;
+        }
+
+        .login-error-box {
+            margin-bottom: 18px;
+        }
+
+        @@media (max-width: 980px) {
+            .login-shell {
+                grid-template-columns: 1fr;
+                padding: 22px;
+            }
+
+            .login-showcase {
+                padding: 8px 0 28px;
+            }
+
+            .login-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .login-panel-wrap {
+                justify-content: stretch;
+            }
+
+            .login-panel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-shell">
+        <section class="login-showcase">
+            <div>
+                <div class="login-brand">Predictor Empresarial de Ventas</div>
+                <h1>Acceso seguro a inteligencia comercial</h1>
+                <p>
+                    Ingresá para consultar ventas, ejecutar proyecciones, revisar auditorías y operar los módulos críticos de la plataforma con permisos controlados.
+                </p>
+
+                <div class="login-metrics">
+                    <div class="login-metric">
+                        <strong>Ventas</strong>
+                        <span>Consultas filtradas y reportes ejecutivos.</span>
+                    </div>
+                    <div class="login-metric">
+                        <strong>Forecast</strong>
+                        <span>Proyecciones por rango con explicación y confianza.</span>
+                    </div>
+                    <div class="login-metric">
+                        <strong>Control</strong>
+                        <span>Auditoría, exportación y abastecimiento supervisado.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="login-footer-note">
+                Plataforma orientada a operación comercial, trazabilidad y decisiones basadas en datos.
+            </div>
+        </section>
+
+        <section class="login-panel-wrap">
+            <div class="login-panel">
+                <div class="login-panel-kicker">Inicio de sesión</div>
+                <h2>Bienvenido</h2>
+                <p class="login-panel-copy">
+                    Autenticate con tu usuario corporativo para acceder a los módulos habilitados según tu perfil.
+                </p>
+
+                @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+                {
+                    <div class="login-error-box">
+                        <partial name="_Alert" model='new AlertViewModel { Title = "Acceso rechazado", Message = Model.ErrorMessage, Variant = "error" }' />
+                    </div>
+                }
+
+                <form asp-action="Login" asp-controller="Auth" method="post" class="auth-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ReturnUrl" />
+
+                    <div class="form-group">
+                        <label asp-for="Username"></label>
+                        <input asp-for="Username" autocomplete="username" />
+                        <span asp-validation-for="Username" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Password"></label>
+                        <input asp-for="Password" autocomplete="current-password" />
+                        <span asp-validation-for="Password" class="field-error"></span>
+                    </div>
+
+                    <button type="submit" class="login-submit">Ingresar al sistema</button>
+                </form>
+
+                <div class="login-footer-note">
+                    Si no podés ingresar, verificá tus credenciales o contactá al administrador del sistema.
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

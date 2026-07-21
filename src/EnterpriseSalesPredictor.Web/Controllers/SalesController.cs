@@ -26,6 +26,7 @@ public sealed class SalesController : Controller
     [HttpGet]
     public async Task<IActionResult> Query([FromQuery] SalesQueryFilterViewModel filters, CancellationToken cancellationToken)
     {
+        filters.PageSize = 20;
         var results = await _salesApiClient.QuerySalesAsync(filters, cancellationToken);
         return Json(results);
     }

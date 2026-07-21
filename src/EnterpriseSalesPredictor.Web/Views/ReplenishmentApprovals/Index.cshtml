@@ -1,0 +1,167 @@
+@model EnterpriseSalesPredictor.Web.ViewModels.Replenishment.ReplenishmentApprovalPageViewModel
+
+@{
+    ViewData["Title"] = "Aprobaciones de abastecimiento";
+}
+
+<section class="hero">
+    <h1>Aprobaciones pendientes de abastecimiento</h1>
+    <p>Revisá y resolvé las sugerencias de compra enviadas a aprobación.</p>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="status-ok">@Model.StatusMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="auth-error">@Model.ErrorMessage</div>
+    }
+
+    <form asp-action="Index" method="get" class="audit-filters">
+        <div class="form-group">
+            <label>Desde</label>
+            <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="form-group">
+            <label>Hasta</label>
+            <input type="date" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="form-group">
+            <label>Producto</label>
+            <select name="productId">
+                <option value="">Todos los productos</option>
+                @foreach (var product in Model.Products)
+                {
+                    if (Model.ProductId == product.Id)
+                    {
+                        <option value="@product.Id" selected>@product.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@product.Id">@product.Name</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <button type="submit">Aplicar filtros</button>
+    </form>
+</section>
+
+<section class="hero table-card">
+    <h2>Listado pendiente</h2>
+
+    @if (Model.Recommendations.TotalCount == 0)
+    {
+        <p>No hay sugerencias pendientes de aprobación.</p>
+    }
+    else
+    {
+        <p>Mostrando @(((Model.Recommendations.PageNumber - 1) * Model.Recommendations.PageSize) + 1) a @Math.Min(Model.Recommendations.PageNumber * Model.Recommendations.PageSize, Model.Recommendations.TotalCount) de @Model.Recommendations.TotalCount registros.</p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Fecha (año/mes)</th>
+                    <th>Nombre producto</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Recommendations.Items)
+            {
+                <tr>
+                    <td>@item.RecommendedForMonth.ToString("yyyy-MM")</td>
+                    <td>@item.ProductName</td>
+                    <td><span class="status-pill status-pill-@item.Status.ToLowerInvariant()">@item.Status</span></td>
+                    <td>
+                        <div class="page-actions">
+                            <form asp-action="Review" method="post" class="approval-form" data-modal-id="approval-approve-modal-@item.Id">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="RecommendationId" value="@item.Id" />
+                                <input type="hidden" name="Action" value="approve" />
+                                <input type="hidden" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="productId" value="@Model.ProductId" />
+                                <input type="hidden" name="pageNumber" value="@Model.Recommendations.PageNumber" />
+                                <button type="submit" class="button button-secondary">Aprobar</button>
+                            </form>
+                            <form asp-action="Review" method="post" class="approval-form" data-modal-id="approval-reject-modal-@item.Id">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="RecommendationId" value="@item.Id" />
+                                <input type="hidden" name="Action" value="reject" />
+                                <input type="hidden" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="productId" value="@Model.ProductId" />
+                                <input type="hidden" name="pageNumber" value="@Model.Recommendations.PageNumber" />
+                                <button type="submit" class="button button-secondary">Rechazar</button>
+                            </form>
+                            <form asp-action="Review" method="post" class="approval-form" data-modal-id="approval-analysis-modal-@item.Id">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="RecommendationId" value="@item.Id" />
+                                <input type="hidden" name="Action" value="analysis" />
+                                <input type="hidden" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="productId" value="@Model.ProductId" />
+                                <input type="hidden" name="pageNumber" value="@Model.Recommendations.PageNumber" />
+                                <button type="submit" class="button button-secondary">Análisis</button>
+                            </form>
+                        </div>
+
+                        <partial name="_Modal" model='new ModalViewModel { Id = $"approval-approve-modal-{item.Id}", Title = "Aprobar sugerencia", Message = $"¿Querés aprobar la sugerencia para {item.ProductName}?", ConfirmLabel = "Aprobar", CancelLabel = "Cancelar" }' />
+                        <partial name="_Modal" model='new ModalViewModel { Id = $"approval-reject-modal-{item.Id}", Title = "Rechazar sugerencia", Message = $"¿Querés rechazar la sugerencia para {item.ProductName}?", ConfirmLabel = "Rechazar", CancelLabel = "Cancelar" }' />
+                        <partial name="_Modal" model='new ModalViewModel { Id = $"approval-analysis-modal-{item.Id}", Title = "Enviar a análisis", Message = $"¿Querés marcar para análisis la sugerencia de {item.ProductName}?", ConfirmLabel = "Enviar", CancelLabel = "Cancelar" }' />
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        <div class="page-actions sales-pagination-bar">
+            @if (Model.Recommendations.PageNumber > 1)
+            {
+                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")" asp-route-productId="@Model.ProductId" asp-route-pageNumber="@(Model.Recommendations.PageNumber - 1)">Anterior</a>
+            }
+
+            <div class="sales-page-numbers">
+                @{
+                    var startPage = Math.Max(1, Model.Recommendations.PageNumber - 2);
+                    var endPage = Math.Min(Math.Max(Model.Recommendations.TotalPages, 1), Model.Recommendations.PageNumber + 2);
+                }
+                @for (var pageIndex = startPage; pageIndex <= endPage; pageIndex++)
+                {
+                    if (pageIndex == Model.Recommendations.PageNumber)
+                    {
+                        <span class="sales-page-link sales-page-link-active">@pageIndex</span>
+                    }
+                    else
+                    {
+                        <a class="sales-page-link" asp-action="Index" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")" asp-route-productId="@Model.ProductId" asp-route-pageNumber="@pageIndex">@pageIndex</a>
+                    }
+                }
+            </div>
+
+            @if (Model.Recommendations.PageNumber < Model.Recommendations.TotalPages)
+            {
+                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")" asp-route-productId="@Model.ProductId" asp-route-pageNumber="@(Model.Recommendations.PageNumber + 1)">Siguiente</a>
+            }
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.approval-form').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                var modalId = form.getAttribute('data-modal-id');
+                window.appUi.confirm(modalId, async function () {
+                    form.submit();
+                });
+            });
+        });
+    </script>
+}

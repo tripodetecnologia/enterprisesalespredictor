@@ -6,6 +6,7 @@ public sealed class ReplenishmentRecommendation : Entity
         Guid id,
         Guid productId,
         DateTime generatedAtUtc,
+        DateTime recommendedForMonth,
         decimal recommendedUnits,
         decimal confidence,
         string rationale)
@@ -13,6 +14,7 @@ public sealed class ReplenishmentRecommendation : Entity
     {
         ProductId = productId;
         GeneratedAtUtc = generatedAtUtc;
+        RecommendedForMonth = recommendedForMonth;
         RecommendedUnits = recommendedUnits;
         Confidence = confidence;
         Rationale = rationale;
@@ -21,7 +23,11 @@ public sealed class ReplenishmentRecommendation : Entity
 
     public Guid ProductId { get; private set; }
 
+    public Product? Product { get; private set; }
+
     public DateTime GeneratedAtUtc { get; private set; }
+
+    public DateTime RecommendedForMonth { get; private set; }
 
     public decimal RecommendedUnits { get; private set; }
 
@@ -59,5 +65,17 @@ public sealed class ReplenishmentRecommendation : Entity
         ReviewedAtUtc = DateTime.UtcNow;
         ReviewedBy = reviewedBy;
         ReviewNotes = notes;
+    }
+
+    public void Refresh(decimal recommendedUnits, decimal confidence, string rationale)
+    {
+        GeneratedAtUtc = DateTime.UtcNow;
+        RecommendedUnits = recommendedUnits;
+        Confidence = confidence;
+        Rationale = rationale;
+        Status = RecommendationStatus.Pending;
+        ReviewedAtUtc = null;
+        ReviewedBy = null;
+        ReviewNotes = null;
     }
 }

@@ -40,6 +40,7 @@ builder.Services.AddHttpClient<UploadsApiClient>((serviceProvider, httpClient) =
 {
     var apiOptions = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptionsMonitor<ApiOptions>>().CurrentValue;
     httpClient.BaseAddress = new Uri(apiOptions.BaseUrl);
+    httpClient.Timeout = TimeSpan.FromMinutes(10);
 });
 
 builder.Services.AddHttpClient<AuditApiClient>((serviceProvider, httpClient) =>

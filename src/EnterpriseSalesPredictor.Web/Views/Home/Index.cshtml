@@ -1,70 +1,70 @@
 @model EnterpriseSalesPredictor.Web.ViewModels.Dashboard.DashboardPageViewModel
 
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Panel";
 }
 
 <section class="hero">
-    <h1>Executive Dashboard</h1>
-    <p>Track KPIs, commercial alerts, and top-performing entities across the sales operation.</p>
+    <h1>Panel ejecutivo</h1>
+    <p>Visualiza KPIs, alertas comerciales y entidades con mejor desempeño en la operación de ventas.</p>
 </section>
 
 <section class="dashboard-kpi-grid">
     <article class="hero dashboard-kpi-card">
-        <span class="dashboard-kpi-label">Total Sales</span>
+        <span class="dashboard-kpi-label">Ventas totales</span>
         <strong class="dashboard-kpi-value">@Model.Kpis.TotalSalesAmount.ToString("N2")</strong>
     </article>
     <article class="hero dashboard-kpi-card">
-        <span class="dashboard-kpi-label">Units Sold</span>
+        <span class="dashboard-kpi-label">Unidades vendidas</span>
         <strong class="dashboard-kpi-value">@Model.Kpis.TotalQuantity.ToString("N2")</strong>
     </article>
     <article class="hero dashboard-kpi-card">
-        <span class="dashboard-kpi-label">Transactions</span>
+        <span class="dashboard-kpi-label">Transacciones</span>
         <strong class="dashboard-kpi-value">@Model.Kpis.TotalTransactions</strong>
     </article>
     <article class="hero dashboard-kpi-card">
-        <span class="dashboard-kpi-label">Average Ticket</span>
+        <span class="dashboard-kpi-label">Ticket promedio</span>
         <strong class="dashboard-kpi-value">@Model.Kpis.AverageTicket.ToString("N2")</strong>
     </article>
 </section>
 
 <section class="dashboard-grid">
     <article class="hero">
-        <h2>Top Customers</h2>
+        <h2>Mejores clientes</h2>
         <partial name="_DashboardBreakdown" model="Model.TopCustomers" />
     </article>
 
     <article class="hero">
-        <h2>Top Products</h2>
+        <h2>Mejores productos</h2>
         <partial name="_DashboardBreakdown" model="Model.TopProducts" />
     </article>
 
     <article class="hero">
-        <h2>Sales by Product Line</h2>
+        <h2>Ventas por línea de producto</h2>
         <partial name="_DashboardBreakdown" model="Model.SalesByLine" />
     </article>
 
     <article class="hero">
-        <h2>Sales by Supplier</h2>
+        <h2>Ventas por proveedor</h2>
         <partial name="_DashboardBreakdown" model="Model.SalesBySupplier" />
     </article>
 </section>
 
 <section class="dashboard-grid">
     <article class="hero">
-        <h2>Quick Access</h2>
+        <h2>Accesos rápidos</h2>
         <div class="dashboard-quick-links">
-            <a asp-controller="Uploads" asp-action="Index">Review Uploads</a>
-            <a asp-controller="Sales" asp-action="Index">Run Sales Query</a>
-            <a asp-controller="Audit" asp-action="Index">Inspect Audit Trail</a>
+            <a asp-controller="Uploads" asp-action="Index">Revisar cargas</a>
+            <a asp-controller="Sales" asp-action="Index">Consultar ventas</a>
+            <a asp-controller="Audit" asp-action="Index">Inspeccionar auditoría</a>
         </div>
     </article>
 
     <article class="hero">
-        <h2>Commercial Alerts</h2>
+        <h2>Alertas comerciales</h2>
         @if (Model.Alerts.Count == 0)
         {
-            <p>No alerts detected for the current data set.</p>
+            <p>No se detectaron alertas para el conjunto actual de datos.</p>
         }
         else
         {

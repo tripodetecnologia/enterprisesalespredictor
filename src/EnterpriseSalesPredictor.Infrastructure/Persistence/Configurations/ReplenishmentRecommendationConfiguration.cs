@@ -15,6 +15,9 @@ public sealed class ReplenishmentRecommendationConfiguration : IEntityTypeConfig
         builder.Property(entity => entity.GeneratedAtUtc)
             .IsRequired();
 
+        builder.Property(entity => entity.RecommendedForMonth)
+            .IsRequired();
+
         builder.Property(entity => entity.RecommendedUnits)
             .HasPrecision(18, 2)
             .IsRequired();
@@ -37,12 +40,12 @@ public sealed class ReplenishmentRecommendationConfiguration : IEntityTypeConfig
         builder.Property(entity => entity.ReviewNotes)
             .HasMaxLength(600);
 
-        builder.HasOne<Product>()
+        builder.HasOne(entity => entity.Product)
             .WithMany()
             .HasForeignKey(entity => entity.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(entity => new { entity.ProductId, entity.GeneratedAtUtc });
+        builder.HasIndex(entity => new { entity.ProductId, entity.RecommendedForMonth });
         builder.HasIndex(entity => entity.Status);
     }
 }

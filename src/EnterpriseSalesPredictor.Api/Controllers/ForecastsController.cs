@@ -18,13 +18,30 @@ public sealed class ForecastsController : ControllerBase
         _forecastService = forecastService;
     }
 
+    [HttpGet("options")]
+    public async Task<IActionResult> GetOptionsAsync(CancellationToken cancellationToken)
+    {
+        var result = await _forecastService.GetOptionsAsync(cancellationToken);
+        return Ok(result);
+    }
+
     [HttpPost]
     public async Task<IActionResult> GenerateAsync([FromBody] GenerateForecastRequest request, CancellationToken cancellationToken)
     {
+        if (!request.FromDate.HasValue)
+        {
+            return BadRequest(new { message = "La fecha de inicio es obligatoria." });
+        }
+
+        if (!request.ToDate.HasValue)
+        {
+            return BadRequest(new { message = "La fecha de fin es obligatoria." });
+        }
+
         var result = await _forecastService.GenerateForecastAsync(new ForecastQuery
         {
-            FromDate = request.FromDate,
-            ToDate = request.ToDate,
+            FromDate = request.FromDate.Value,
+            ToDate = request.ToDate.Value,
             ProductId = request.ProductId,
             CustomerId = request.CustomerId,
             RequestedBy = User.Identity?.Name ?? "system"

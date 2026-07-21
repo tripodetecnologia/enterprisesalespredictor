@@ -6,7 +6,11 @@ public sealed class ReplenishmentRecommendationDto
 
     public Guid ProductId { get; set; }
 
+    public string ProductName { get; set; } = string.Empty;
+
     public DateTime GeneratedAtUtc { get; set; }
+
+    public DateTime RecommendedForMonth { get; set; }
 
     public decimal RecommendedUnits { get; set; }
 

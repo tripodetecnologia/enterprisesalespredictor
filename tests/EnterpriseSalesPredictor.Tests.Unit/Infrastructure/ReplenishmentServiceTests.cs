@@ -21,14 +21,15 @@ public sealed class ReplenishmentServiceTests
 
         var result = await service.GenerateRecommendationAsync(new GenerateReplenishmentCommand
         {
-            ProductId = productId,
+            FromDate = DateTime.UtcNow.Date,
+            ToDate = DateTime.UtcNow.Date.AddDays(30),
             RequestedBy = "planner"
         });
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.RecommendedUnits, Is.GreaterThan(0));
-            Assert.That(result.Status, Is.EqualTo(RecommendationStatus.Pending.ToString()));
+            Assert.That(result.First().RecommendedUnits, Is.GreaterThan(0));
+            Assert.That(result.First().Status, Is.EqualTo(RecommendationStatus.Pending.ToString()));
             Assert.That(dbContext.ReplenishmentRecommendations.Count(), Is.EqualTo(1));
         });
     }
@@ -40,7 +41,7 @@ public sealed class ReplenishmentServiceTests
         var productId = SeedReplenishmentData(dbContext);
         var auditLogService = CreateAuditMock();
         var service = new ReplenishmentService(dbContext, auditLogService.Object);
-        var recommendation = await service.GenerateRecommendationAsync(new GenerateReplenishmentCommand { ProductId = productId, RequestedBy = "planner" });
+        var recommendation = (await service.GenerateRecommendationAsync(new GenerateReplenishmentCommand { FromDate = DateTime.UtcNow.Date, ToDate = DateTime.UtcNow.Date.AddDays(30), RequestedBy = "planner" })).First();
 
         var reviewed = await service.ReviewRecommendationAsync(new ReviewReplenishmentCommand
         {
@@ -65,7 +66,7 @@ public sealed class ReplenishmentServiceTests
         var productId = SeedReplenishmentData(dbContext);
         var auditLogService = CreateAuditMock();
         var service = new ReplenishmentService(dbContext, auditLogService.Object);
-        var recommendation = service.GenerateRecommendationAsync(new GenerateReplenishmentCommand { ProductId = productId, RequestedBy = "planner" }).GetAwaiter().GetResult();
+        var recommendation = service.GenerateRecommendationAsync(new GenerateReplenishmentCommand { FromDate = DateTime.UtcNow.Date, ToDate = DateTime.UtcNow.Date.AddDays(30), RequestedBy = "planner" }).GetAwaiter().GetResult().First();
 
         var exception = Assert.ThrowsAsync<ValidationException>(async () => await service.ReviewRecommendationAsync(new ReviewReplenishmentCommand
         {

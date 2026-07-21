@@ -2,5 +2,7 @@ namespace EnterpriseSalesPredictor.Api.Contracts.Replenishment;
 
 public sealed class GenerateRecommendationRequest
 {
-    public Guid ProductId { get; set; }
+    public DateTime? FromDate { get; set; }
+
+    public DateTime? ToDate { get; set; }
 }

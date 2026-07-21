@@ -17,9 +17,11 @@ public sealed class SalesApiClient
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<IReadOnlyCollection<SaleItemViewModel>> QuerySalesAsync(SalesQueryFilterViewModel filters, CancellationToken cancellationToken = default)
+    public async Task<PagedSalesResultViewModel> QuerySalesAsync(SalesQueryFilterViewModel filters, CancellationToken cancellationToken = default)
     {
         AttachBearerToken();
+
+        filters.PageSize = 20;
 
         var parameters = new Dictionary<string, string?>
         {
@@ -42,9 +44,8 @@ public sealed class SalesApiClient
             parameters
                 .Where(item => !string.IsNullOrWhiteSpace(item.Value))
                 .ToDictionary(item => item.Key, item => item.Value));
-        var payload = await _httpClient.GetFromJsonAsync<SaleItemViewModel[]>(endpoint, cancellationToken);
-
-        return payload ?? Array.Empty<SaleItemViewModel>();
+        return await _httpClient.GetFromJsonAsync<PagedSalesResultViewModel>(endpoint, cancellationToken)
+            ?? new PagedSalesResultViewModel();
     }
 
     private void AttachBearerToken()

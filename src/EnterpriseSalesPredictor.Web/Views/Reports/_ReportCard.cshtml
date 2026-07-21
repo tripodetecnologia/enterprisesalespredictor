@@ -2,11 +2,11 @@
 
 <article class="hero report-card">
     <h2>@Model.Title</h2>
-    <p>Generated at @Model.GeneratedAtUtc.ToString("u")</p>
+    <p>Generado el @Model.GeneratedAtUtc.ToString("u")</p>
 
     @if (Model.Sections.Count == 0)
     {
-        <p>No sections available.</p>
+        <p>No hay secciones disponibles.</p>
     }
     else
     {

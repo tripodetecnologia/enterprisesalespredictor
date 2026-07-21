@@ -2,7 +2,7 @@ namespace EnterpriseSalesPredictor.Web.ViewModels.Replenishment;
 
 public sealed class ReplenishmentPageViewModel
 {
-    public IReadOnlyCollection<ReplenishmentRecommendationViewModel> Recommendations { get; set; } = Array.Empty<ReplenishmentRecommendationViewModel>();
+    public PagedReplenishmentResultViewModel Recommendations { get; set; } = new();
 
     public GenerateRecommendationFormViewModel GenerateForm { get; set; } = new();
 

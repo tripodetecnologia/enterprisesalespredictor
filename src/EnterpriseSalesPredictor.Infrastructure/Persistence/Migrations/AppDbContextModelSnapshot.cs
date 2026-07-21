@@ -224,6 +224,9 @@ namespace EnterpriseSalesPredictor.Infrastructure.Persistence.Migrations
                         .HasMaxLength(1200)
                         .HasColumnType("varchar(1200)");
 
+                    b.Property<DateTime>("RecommendedForMonth")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<decimal>("RecommendedUnits")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -246,7 +249,7 @@ namespace EnterpriseSalesPredictor.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Status");
 
-                    b.HasIndex("ProductId", "GeneratedAtUtc");
+                    b.HasIndex("ProductId", "RecommendedForMonth");
 
                     b.ToTable("replenishment_recommendations", (string)null);
                 });
@@ -533,11 +536,13 @@ namespace EnterpriseSalesPredictor.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("EnterpriseSalesPredictor.Domain.Entities.ReplenishmentRecommendation", b =>
                 {
-                    b.HasOne("EnterpriseSalesPredictor.Domain.Entities.Product", null)
+                    b.HasOne("EnterpriseSalesPredictor.Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("EnterpriseSalesPredictor.Domain.Entities.RolePermission", b =>

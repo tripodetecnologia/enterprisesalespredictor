@@ -1,71 +1,65 @@
 @model EnterpriseSalesPredictor.Web.ViewModels.Sales.SalesQueryPageViewModel
 
 @{
-    ViewData["Title"] = "Sales Query";
+    ViewData["Title"] = "Consulta de ventas";
 }
 
 <section class="hero">
-    <h1>Sales Query</h1>
-    <p>Filter sales records and load results dynamically from the API.</p>
+    <h1>Consulta de ventas</h1>
+    <p>Filtrá registros de ventas y cargá resultados dinámicamente desde la API.</p>
 
     <form id="sales-query-form" class="audit-filters">
         <div class="form-group">
-            <label asp-for="Filters.FromDate">From</label>
+            <label asp-for="Filters.FromDate">Desde</label>
             <input asp-for="Filters.FromDate" type="date" />
         </div>
 
         <div class="form-group">
-            <label asp-for="Filters.ToDate">To</label>
+            <label asp-for="Filters.ToDate">Hasta</label>
             <input asp-for="Filters.ToDate" type="date" />
         </div>
 
         <div class="form-group">
-            <label asp-for="Filters.City">City</label>
+            <label asp-for="Filters.City">Ciudad</label>
             <input asp-for="Filters.City" />
         </div>
 
         <div class="form-group">
-            <label asp-for="Filters.Zone">Zone</label>
+            <label asp-for="Filters.Zone">Zona</label>
             <input asp-for="Filters.Zone" />
         </div>
 
         <div class="form-group">
-            <label asp-for="Filters.SortBy">Sort By</label>
+            <label asp-for="Filters.SortBy">Ordenar por</label>
             <select asp-for="Filters.SortBy">
-                <option value="SaleDate">Sale Date</option>
-                <option value="SaleAmount">Sale Amount</option>
-                <option value="Quantity">Quantity</option>
-                <option value="InvoiceNumber">Invoice Number</option>
+                <option value="SaleDate">Fecha de venta</option>
+                <option value="SaleAmount">Monto de venta</option>
+                <option value="Quantity">Cantidad</option>
+                <option value="InvoiceNumber">Número de factura</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label asp-for="Filters.SortDirection">Direction</label>
+            <label asp-for="Filters.SortDirection">Dirección</label>
             <select asp-for="Filters.SortDirection">
-                <option value="desc">Descending</option>
-                <option value="asc">Ascending</option>
+                <option value="desc">Descendente</option>
+                <option value="asc">Ascendente</option>
             </select>
         </div>
 
-        <div class="form-group">
-            <label asp-for="Filters.PageSize">Page Size</label>
-            <select asp-for="Filters.PageSize">
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-            </select>
-        </div>
+        <input asp-for="Filters.PageNumber" type="hidden" />
+        <input asp-for="Filters.PageSize" type="hidden" />
 
-        <button type="submit">Search</button>
+        <button type="submit">Buscar</button>
     </form>
 
     <div class="page-actions">
-        <button type="button" id="sales-export-button" class="button">Export filtered results</button>
+        <button type="button" id="sales-export-button" class="button">Exportar resultados filtrados</button>
     </div>
 </section>
 
 <section id="sales-loading" hidden>
-    <partial name="_StatePanel" model='new StateViewModel { Title = "Loading", Message = "Loading sales results...", Variant = "loading" }' />
+    <partial name="_StatePanel" model='new StateViewModel { Title = "Cargando", Message = "Cargando resultados de ventas...", Variant = "loading" }' />
 </section>
 
 <section id="sales-error" hidden></section>
@@ -73,34 +67,41 @@
 <section id="sales-export-status" hidden></section>
 
 <section id="sales-empty" hidden>
-    <partial name="_StatePanel" model='new StateViewModel { Title = "No Results", Message = "No sales matched the current filters.", Variant = "neutral" }' />
+    <partial name="_StatePanel" model='new StateViewModel { Title = "Sin resultados", Message = "No hay ventas que coincidan con los filtros actuales.", Variant = "neutral" }' />
 </section>
 
 <section class="hero table-card" id="sales-results-section">
-    <h2>Results</h2>
+    <h2>Resultados</h2>
+    <p id="sales-results-summary">Mostrando 0 registros.</p>
+    <div class="page-actions sales-pagination-bar">
+        <button type="button" id="sales-prev-page" class="button button-secondary" disabled>Anterior</button>
+        <span id="sales-page-indicator">Página 1</span>
+        <div id="sales-page-numbers" class="sales-page-numbers"></div>
+        <button type="button" id="sales-next-page" class="button button-secondary" disabled>Siguiente</button>
+    </div>
     <table class="data-table" id="sales-results-table">
         <thead>
             <tr>
-                <th>Sale Date</th>
-                <th>Invoice</th>
-                <th>Customer</th>
-                <th>Product</th>
-                <th>Supplier</th>
-                <th>Seller</th>
-                <th>Quantity</th>
-                <th>Amount</th>
-                <th>Payment</th>
+                <th>Fecha de venta</th>
+                <th>Factura</th>
+                <th>Cliente</th>
+                <th>Producto</th>
+                <th>Proveedor</th>
+                <th>Vendedor</th>
+                <th>Cantidad</th>
+                <th>Monto</th>
+                <th>Pago</th>
             </tr>
         </thead>
         <tbody id="sales-results-body">
             <tr>
-                <td colspan="9">Run a search to display results.</td>
+                <td colspan="9">Ejecutá una búsqueda para mostrar resultados.</td>
             </tr>
         </tbody>
     </table>
 </section>
 
-<partial name="_Modal" model='new ModalViewModel { Id = "sales-export-modal", Title = "Export Sales", Message = "Export the current filtered sales results?", ConfirmLabel = "Export", CancelLabel = "Cancel" }' />
+<partial name="_Modal" model='new ModalViewModel { Id = "sales-export-modal", Title = "Exportar ventas", Message = "¿Querés exportar los resultados filtrados actuales?", ConfirmLabel = "Exportar", CancelLabel = "Cancelar" }' />
 
 @section Scripts {
     <script src="~/js/pages/sales-index.js" asp-append-version="true"></script>

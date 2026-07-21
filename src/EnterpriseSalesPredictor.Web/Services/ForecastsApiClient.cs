@@ -43,6 +43,27 @@ public sealed class ForecastsApiClient
         return payload;
     }
 
+    public async Task<ForecastPageViewModel> GetOptionsAsync(CancellationToken cancellationToken = default)
+    {
+        AttachBearerToken();
+
+        var payload = await _httpClient.GetFromJsonAsync<ForecastOptionsResponse>("api/forecasts/options", cancellationToken);
+        if (payload is null)
+        {
+            return new ForecastPageViewModel();
+        }
+
+        return new ForecastPageViewModel
+        {
+            Customers = payload.Customers
+                .Select(item => new ForecastOptionViewModel { Id = item.Id, Name = item.Name })
+                .ToArray(),
+            Products = payload.Products
+                .Select(item => new ForecastOptionViewModel { Id = item.Id, Name = item.Name })
+                .ToArray()
+        };
+    }
+
     private void AttachBearerToken()
     {
         var accessToken = _httpContextAccessor.HttpContext?.User.FindFirstValue("access_token");
@@ -50,5 +71,19 @@ public sealed class ForecastsApiClient
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         }
+    }
+
+    private sealed class ForecastOptionsResponse
+    {
+        public ForecastOptionResponse[] Customers { get; set; } = Array.Empty<ForecastOptionResponse>();
+
+        public ForecastOptionResponse[] Products { get; set; } = Array.Empty<ForecastOptionResponse>();
+    }
+
+    private sealed class ForecastOptionResponse
+    {
+        public Guid Id { get; set; }
+
+        public string Name { get; set; } = string.Empty;
     }
 }

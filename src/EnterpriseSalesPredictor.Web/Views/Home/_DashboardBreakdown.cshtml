@@ -2,7 +2,7 @@
 
 @if (Model.Count == 0)
 {
-    <p>No data available.</p>
+    <p>No hay datos disponibles.</p>
 }
 else
 {
@@ -20,7 +20,7 @@ else
                 <div class="dashboard-breakdown-bar-track">
                     <div class="dashboard-breakdown-bar-fill" style="width: @(width.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
                 </div>
-                <small>@item.TotalTransactions transactions | @item.TotalQuantity.ToString("N2") units</small>
+                <small>@item.TotalTransactions transacciones | @item.TotalQuantity.ToString("N2") unidades</small>
             </div>
         }
     </div>

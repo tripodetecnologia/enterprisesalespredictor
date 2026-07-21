@@ -31,7 +31,7 @@
     async function confirm(modalId, onConfirm) {
         var modal = document.getElementById(modalId);
         if (!modal || typeof modal.showModal !== "function") {
-            if (window.confirm("Please confirm this action.")) {
+            if (window.confirm("Confirmá esta acción.")) {
                 await onConfirm();
             }
 

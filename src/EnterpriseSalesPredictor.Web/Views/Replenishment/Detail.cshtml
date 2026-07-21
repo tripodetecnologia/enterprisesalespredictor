@@ -1,12 +1,12 @@
 @model EnterpriseSalesPredictor.Web.ViewModels.Replenishment.ReplenishmentDetailPageViewModel
 
 @{
-    ViewData["Title"] = "Recommendation Detail";
+    ViewData["Title"] = "Detalle de recomendación";
 }
 
 <section class="hero">
-    <h1>Recommendation Detail</h1>
-    <p><a asp-action="Index">Back to recommendations</a></p>
+    <h1>Detalle de recomendación</h1>
+    <p><a asp-action="Index">Volver a recomendaciones</a></p>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
@@ -21,39 +21,39 @@
 
 <section class="hero dashboard-grid">
     <article>
-        <h2>Recommendation Summary</h2>
-        <p><strong>Status:</strong> <span class="status-pill status-pill-@Model.Recommendation.Status.ToLowerInvariant()">@Model.Recommendation.Status</span></p>
-        <p><strong>Product Id:</strong> @Model.Recommendation.ProductId</p>
-        <p><strong>Generated At:</strong> @Model.Recommendation.GeneratedAtUtc.ToString("u")</p>
-        <p><strong>Recommended Units:</strong> @Model.Recommendation.RecommendedUnits.ToString("N2")</p>
-        <p><strong>Confidence:</strong> @Model.Recommendation.Confidence.ToString("P0")</p>
-        <p><strong>Rationale:</strong> @Model.Recommendation.Rationale</p>
-        <p><strong>Reviewed By:</strong> @(Model.Recommendation.ReviewedBy ?? "Pending")</p>
-        <p><strong>Reviewed At:</strong> @(Model.Recommendation.ReviewedAtUtc?.ToString("u") ?? "Pending")</p>
-        <p><strong>Review Notes:</strong> @(Model.Recommendation.ReviewNotes ?? "No notes recorded")</p>
+        <h2>Resumen de la recomendación</h2>
+        <p><strong>Estado:</strong> <span class="status-pill status-pill-@Model.Recommendation.Status.ToLowerInvariant()">@Model.Recommendation.Status</span></p>
+        <p><strong>ID del producto:</strong> @Model.Recommendation.ProductId</p>
+        <p><strong>Generado el:</strong> @Model.Recommendation.GeneratedAtUtc.ToString("u")</p>
+        <p><strong>Unidades recomendadas:</strong> @Model.Recommendation.RecommendedUnits.ToString("N2")</p>
+        <p><strong>Confianza:</strong> @Model.Recommendation.Confidence.ToString("P0")</p>
+        <p><strong>Justificación:</strong> @Model.Recommendation.Rationale</p>
+        <p><strong>Revisado por:</strong> @(Model.Recommendation.ReviewedBy ?? "Pendiente")</p>
+        <p><strong>Revisado el:</strong> @(Model.Recommendation.ReviewedAtUtc?.ToString("u") ?? "Pendiente")</p>
+        <p><strong>Notas de revisión:</strong> @(Model.Recommendation.ReviewNotes ?? "No hay notas registradas")</p>
     </article>
 
     <article>
-        <h2>Review Actions</h2>
+        <h2>Acciones de revisión</h2>
         <form asp-action="Review" method="post" class="auth-form">
             @Html.AntiForgeryToken()
             <input asp-for="ReviewForm.RecommendationId" type="hidden" />
 
             <div class="form-group">
-                <label asp-for="ReviewForm.Action">Action</label>
+                <label asp-for="ReviewForm.Action">Acción</label>
                 <select asp-for="ReviewForm.Action">
-                    <option value="approve">Approve</option>
-                    <option value="reject">Reject</option>
-                    <option value="analysis">Mark for analysis</option>
+                    <option value="approve">Aprobar</option>
+                    <option value="reject">Rechazar</option>
+                    <option value="analysis">Marcar para análisis</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label asp-for="ReviewForm.Notes">Notes</label>
+                <label asp-for="ReviewForm.Notes">Notas</label>
                 <input asp-for="ReviewForm.Notes" />
             </div>
 
-            <button type="submit">Submit review</button>
+            <button type="submit">Enviar revisión</button>
         </form>
     </article>
 </section>

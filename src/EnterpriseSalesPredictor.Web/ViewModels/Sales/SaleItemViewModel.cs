@@ -8,11 +8,19 @@ public sealed class SaleItemViewModel
 
     public Guid CustomerId { get; set; }
 
+    public string CustomerName { get; set; } = string.Empty;
+
     public Guid ProductId { get; set; }
+
+    public string ProductName { get; set; } = string.Empty;
 
     public Guid SupplierId { get; set; }
 
+    public string SupplierName { get; set; } = string.Empty;
+
     public Guid SellerId { get; set; }
+
+    public string SellerName { get; set; } = string.Empty;
 
     public DateTime SaleDate { get; set; }
 

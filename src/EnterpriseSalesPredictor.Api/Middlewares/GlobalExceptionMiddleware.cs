@@ -31,9 +31,9 @@ public sealed class GlobalExceptionMiddleware
                             group => group.Key,
                             group => group.Select(error => error.Message).ToArray()))
                 {
-                    Title = "Validation failed.",
+                    Title = "La validación falló.",
                     Status = StatusCodes.Status400BadRequest,
-                    Detail = "One or more validation errors occurred.",
+                    Detail = "Se produjeron uno o más errores de validación.",
                     Instance = context.Request.Path
                 };
 
@@ -48,9 +48,9 @@ public sealed class GlobalExceptionMiddleware
 
             var problem = new ProblemDetails
             {
-                Title = "An unexpected error occurred.",
+                Title = "Se produjo un error inesperado.",
                 Status = StatusCodes.Status500InternalServerError,
-                Detail = "The request could not be processed.",
+                Detail = "No se pudo procesar la solicitud.",
                 Instance = context.Request.Path
             };
 

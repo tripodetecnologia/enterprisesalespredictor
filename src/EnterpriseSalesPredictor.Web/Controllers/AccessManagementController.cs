@@ -35,14 +35,14 @@ public sealed class AccessManagementController : Controller
         {
             var invalidModel = await BuildPageModelAsync(cancellationToken);
             invalidModel.CreateUserForm = model;
-            invalidModel.ErrorMessage = "Please correct the user form fields.";
+            invalidModel.ErrorMessage = "Corregí los campos del formulario de usuario.";
             return View("Index", invalidModel);
         }
 
         try
         {
             await _accessManagementApiClient.CreateUserAsync(model, cancellationToken);
-            TempData["StatusMessage"] = "User created successfully.";
+            TempData["StatusMessage"] = "Usuario creado correctamente.";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception exception)
@@ -65,14 +65,14 @@ public sealed class AccessManagementController : Controller
         {
             var invalidModel = await BuildPageModelAsync(cancellationToken);
             invalidModel.UpdateRoleForm = model;
-            invalidModel.ErrorMessage = "Please provide a role to update.";
+            invalidModel.ErrorMessage = "Indicá un rol para actualizar.";
             return View("Index", invalidModel);
         }
 
         try
         {
             await _accessManagementApiClient.UpdateRolePermissionsAsync(model, cancellationToken);
-            TempData["StatusMessage"] = "Role permissions updated successfully.";
+            TempData["StatusMessage"] = "Los permisos del rol se actualizaron correctamente.";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception exception)

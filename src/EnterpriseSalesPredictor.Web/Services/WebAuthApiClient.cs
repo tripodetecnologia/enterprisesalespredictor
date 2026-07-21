@@ -22,13 +22,13 @@ public sealed class WebAuthApiClient : IWebAuthApiClient
 
         if (!response.IsSuccessStatusCode)
         {
-            return LoginResult.Failure("Invalid credentials.");
+            return LoginResult.Failure("Credenciales inválidas.");
         }
 
         var payload = await response.Content.ReadFromJsonAsync<LoginApiResponse>(cancellationToken: cancellationToken);
         if (payload is null || string.IsNullOrWhiteSpace(payload.AccessToken))
         {
-            return LoginResult.Failure("Authentication service returned an invalid response.");
+            return LoginResult.Failure("El servicio de autenticación devolvió una respuesta inválida.");
         }
 
         return LoginResult.Success(payload.AccessToken, payload.ExpiresInMinutes);

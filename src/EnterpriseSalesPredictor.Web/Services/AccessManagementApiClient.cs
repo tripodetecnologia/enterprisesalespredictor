@@ -55,7 +55,7 @@ public sealed class AccessManagementApiClient
         if (!response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new InvalidOperationException($"API rejected user creation: {content}");
+            throw new InvalidOperationException($"La API rechazó la creación del usuario: {content}");
         }
     }
 
@@ -72,7 +72,7 @@ public sealed class AccessManagementApiClient
         if (!response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new InvalidOperationException($"API rejected role update: {content}");
+            throw new InvalidOperationException($"La API rechazó la actualización del rol: {content}");
         }
     }
 

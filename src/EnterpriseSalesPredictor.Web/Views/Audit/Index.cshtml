@@ -1,49 +1,49 @@
 @model EnterpriseSalesPredictor.Web.ViewModels.Audit.AuditPageViewModel
 
 @{
-    ViewData["Title"] = "Operational Audit";
+    ViewData["Title"] = "Auditoría operativa";
 }
 
 <section class="hero">
-    <h1>Operational Audit</h1>
-    <p>Review load, export and functional events with server-side security enforcement.</p>
+    <h1>Auditoría operativa</h1>
+    <p>Revisá eventos de carga, exportación y operación con seguridad aplicada del lado del servidor.</p>
 
     <form method="get" class="audit-filters">
         <div class="form-group">
-            <label asp-for="Filters.Module">Module</label>
+            <label asp-for="Filters.Module">Módulo</label>
             <input asp-for="Filters.Module" />
         </div>
 
         <div class="form-group">
-            <label asp-for="Filters.Actor">Actor</label>
+            <label asp-for="Filters.Actor">Usuario</label>
             <input asp-for="Filters.Actor" />
         </div>
 
         <div class="form-group">
-            <label asp-for="Filters.FromUtc">From (UTC)</label>
+            <label asp-for="Filters.FromUtc">Desde (UTC)</label>
             <input asp-for="Filters.FromUtc" type="datetime-local" />
         </div>
 
         <div class="form-group">
-            <label asp-for="Filters.ToUtc">To (UTC)</label>
+            <label asp-for="Filters.ToUtc">Hasta (UTC)</label>
             <input asp-for="Filters.ToUtc" type="datetime-local" />
         </div>
 
-        <button type="submit">Apply filters</button>
+        <button type="submit">Aplicar filtros</button>
     </form>
 </section>
 
 <section class="hero">
-    <h2>Upload Audit</h2>
+    <h2>Auditoría de cargas</h2>
     <partial name="_AuditTable" model="Model.UploadLogs" />
 </section>
 
 <section class="hero">
-    <h2>Export Audit</h2>
+    <h2>Auditoría de exportaciones</h2>
     <partial name="_AuditTable" model="Model.ExportLogs" />
 </section>
 
 <section class="hero">
-    <h2>Functional Audit</h2>
+    <h2>Auditoría funcional</h2>
     <partial name="_AuditTable" model="Model.FunctionalLogs" />
 </section>

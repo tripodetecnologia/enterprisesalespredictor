@@ -51,6 +51,6 @@ public sealed class ReplenishmentRecommendationTests
 
     private static ReplenishmentRecommendation CreateRecommendation()
     {
-        return new ReplenishmentRecommendation(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, 15m, 0.8m, "rationale");
+        return new ReplenishmentRecommendation(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, new DateTime(2026, 1, 1), 15m, 0.8m, "rationale");
     }
 }

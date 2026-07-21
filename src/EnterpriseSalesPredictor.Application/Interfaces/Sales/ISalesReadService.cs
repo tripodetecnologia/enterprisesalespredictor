@@ -4,7 +4,7 @@ namespace EnterpriseSalesPredictor.Application.Interfaces.Sales;
 
 public interface ISalesReadService
 {
-    Task<IReadOnlyCollection<SaleDto>> QuerySalesAsync(SalesQueryCriteria criteria, CancellationToken cancellationToken = default);
+    Task<PagedSalesResult> QuerySalesAsync(SalesQueryCriteria criteria, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<SalesDimensionSummaryDto>> GetSalesByCustomerAsync(SalesQueryCriteria criteria, CancellationToken cancellationToken = default);
 

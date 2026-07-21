@@ -19,9 +19,17 @@ public sealed class ReplenishmentController : ControllerBase
 
     [HttpGet("recommendations")]
     [Authorize(Policy = "Permission:replenishment:read")]
-    public async Task<IActionResult> GetRecommendationsAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetRecommendationsAsync([FromQuery] ReplenishmentQueryCriteria criteria, CancellationToken cancellationToken)
     {
-        var result = await _replenishmentService.GetRecommendationsAsync(cancellationToken);
+        var result = await _replenishmentService.GetRecommendationsAsync(criteria, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("projections")]
+    [Authorize(Policy = "Permission:replenishment:read")]
+    public async Task<IActionResult> GetProjectionsAsync([FromQuery] ReplenishmentProjectionQueryCriteria criteria, CancellationToken cancellationToken)
+    {
+        var result = await _replenishmentService.GetProjectionsAsync(criteria, cancellationToken);
         return Ok(result);
     }
 
@@ -29,9 +37,31 @@ public sealed class ReplenishmentController : ControllerBase
     [Authorize(Policy = "Permission:replenishment:write")]
     public async Task<IActionResult> GenerateRecommendationAsync([FromBody] GenerateRecommendationRequest request, CancellationToken cancellationToken)
     {
+        if (!request.FromDate.HasValue || !request.ToDate.HasValue)
+        {
+            return BadRequest(new { message = "Debés indicar un rango de fechas válido." });
+        }
+
         var result = await _replenishmentService.GenerateRecommendationAsync(new GenerateReplenishmentCommand
         {
+            FromDate = request.FromDate.Value,
+            ToDate = request.ToDate.Value,
+            RequestedBy = User.Identity?.Name ?? "system"
+        }, cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpPost("projections/submit")]
+    [Authorize(Policy = "Permission:replenishment:write")]
+    public async Task<IActionResult> SubmitProjectionAsync([FromBody] SubmitProjectionRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _replenishmentService.SubmitProjectionAsync(new SubmitReplenishmentProjectionCommand
+        {
+            ProjectionMonth = request.ProjectionMonth,
             ProductId = request.ProductId,
+            RecommendedUnits = request.RecommendedUnits,
+            CurrentStockUnits = request.CurrentStockUnits,
             RequestedBy = User.Identity?.Name ?? "system"
         }, cancellationToken);
 

@@ -20,7 +20,7 @@ public sealed class SalesQueryFilterViewModel
 
     public int PageNumber { get; set; } = 1;
 
-    public int PageSize { get; set; } = 50;
+    public int PageSize { get; set; } = 20;
 
     public string SortBy { get; set; } = "SaleDate";
 

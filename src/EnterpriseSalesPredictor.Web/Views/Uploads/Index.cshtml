@@ -1,17 +1,17 @@
 @model EnterpriseSalesPredictor.Web.ViewModels.Uploads.UploadPageViewModel
 
 @{
-    ViewData["Title"] = "File Uploads";
+    ViewData["Title"] = "Carga de archivos";
 }
 
 <section class="hero">
-    <h1>Sales Data Uploads</h1>
-    <p>Upload Excel or semicolon-delimited files to ingest sales history.</p>
+    <h1>Carga de datos de ventas</h1>
+    <p>Cargá archivos Excel o delimitados por punto y coma para incorporar históricos de ventas.</p>
 
     <ul>
-        <li>Allowed formats: <strong>.xlsx</strong>, <strong>.xls</strong>, <strong>.csv</strong>, <strong>.txt</strong></li>
-        <li>Maximum size: <strong>20 MB</strong></li>
-        <li>Delimiter for flat files: <strong>;</strong></li>
+        <li>Formatos permitidos: <strong>.xlsx</strong>, <strong>.xls</strong>, <strong>.csv</strong>, <strong>.txt</strong></li>
+        <li>Tamaño máximo: <strong>20 MB</strong></li>
+        <li>Delimitador para archivos planos: <strong>;</strong></li>
     </ul>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
@@ -28,8 +28,8 @@
         @Html.AntiForgeryToken()
 
         <div class="upload-dropzone" id="upload-dropzone">
-            <p class="upload-dropzone-title">Drag and drop a file here</p>
-            <p class="upload-dropzone-subtitle">or select one from your computer.</p>
+            <p class="upload-dropzone-title">Arrastrá y soltá un archivo acá</p>
+            <p class="upload-dropzone-subtitle">o seleccioná uno desde tu equipo.</p>
             <input type="file" name="file" id="upload-file-input" accept=".xlsx,.xls,.csv,.txt" />
         </div>
 
@@ -37,22 +37,22 @@
             <div class="upload-progress-bar" id="upload-progress-bar"></div>
         </div>
 
-        <button type="submit">Process upload</button>
+        <button type="submit">Procesar carga</button>
     </form>
 </section>
 
 @if (Model.LastResult is not null)
 {
     <section class="hero">
-        <h2>Last processing summary</h2>
+        <h2>Último resumen de procesamiento</h2>
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Upload Id</th>
-                    <th>Status</th>
+                    <th>ID de carga</th>
+                    <th>Estado</th>
                     <th>Total</th>
-                    <th>Valid</th>
-                    <th>Invalid</th>
+                    <th>Válidos</th>
+                    <th>Inválidos</th>
                 </tr>
             </thead>
             <tbody>
@@ -69,25 +69,25 @@
 }
 
 <section class="hero">
-    <h2>Upload history</h2>
+    <h2>Historial de cargas</h2>
 
     @if (Model.Uploads.Count == 0)
     {
-        <p>No uploads found yet.</p>
+        <p>Todavía no hay cargas registradas.</p>
     }
     else
     {
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Uploaded At (UTC)</th>
-                    <th>File Name</th>
+                    <th>Fecha de carga (UTC)</th>
+                    <th>Archivo</th>
                     <th>Type</th>
-                    <th>Status</th>
+                    <th>Estado</th>
                     <th>Total</th>
-                    <th>Valid</th>
-                    <th>Invalid</th>
-                    <th>Actions</th>
+                    <th>Válidos</th>
+                    <th>Inválidos</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -102,7 +102,7 @@
                     <td>@upload.ValidRecords</td>
                     <td>@upload.InvalidRecords</td>
                     <td>
-                        <a asp-action="Errors" asp-route-id="@upload.Id">View errors</a>
+                        <a asp-action="Errors" asp-route-id="@upload.Id">Ver errores</a>
                     </td>
                 </tr>
             }

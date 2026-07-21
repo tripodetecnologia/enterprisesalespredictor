@@ -1,12 +1,12 @@
 @model EnterpriseSalesPredictor.Web.ViewModels.Access.AccessManagementPageViewModel
 
 @{
-    ViewData["Title"] = "Access Management";
+    ViewData["Title"] = "Gestión de accesos";
 }
 
 <section class="hero">
-    <h1>Access Management</h1>
-    <p>Manage users, roles and permissions for the platform.</p>
+    <h1>Gestión de accesos</h1>
+    <p>Administrá usuarios, roles y permisos de la plataforma.</p>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
@@ -21,13 +21,13 @@
 
 <section class="hero access-grid">
     <div>
-        <h2>Users</h2>
+        <h2>Usuarios</h2>
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Username</th>
-                    <th>Role</th>
-                    <th>Permissions</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Permisos</th>
                 </tr>
             </thead>
             <tbody>
@@ -44,46 +44,46 @@
     </div>
 
     <div>
-        <h2>Create User</h2>
+        <h2>Crear usuario</h2>
         <form asp-action="CreateUser" method="post" class="auth-form">
             @Html.AntiForgeryToken()
 
             <div class="form-group">
-                <label asp-for="CreateUserForm.Username"></label>
+                <label>Usuario</label>
                 <input asp-for="CreateUserForm.Username" />
                 <span asp-validation-for="CreateUserForm.Username" class="field-error"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="CreateUserForm.Password"></label>
+                <label>Clave</label>
                 <input asp-for="CreateUserForm.Password" />
                 <span asp-validation-for="CreateUserForm.Password" class="field-error"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="CreateUserForm.Role"></label>
+                <label>Rol</label>
                 <input asp-for="CreateUserForm.Role" />
                 <span asp-validation-for="CreateUserForm.Role" class="field-error"></span>
             </div>
 
             <div class="form-group">
-                <label>Permissions (comma separated)</label>
+                <label>Permisos (separados por coma)</label>
                 <input asp-for="CreateUserForm.PermissionsRaw" />
             </div>
 
-            <button type="submit">Create user</button>
+            <button type="submit">Crear usuario</button>
         </form>
     </div>
 </section>
 
 <section class="hero">
-    <h2>Roles and Permissions</h2>
+    <h2>Roles y permisos</h2>
 
     <table class="data-table">
         <thead>
             <tr>
-                <th>Role</th>
-                <th>Permissions</th>
+                <th>Rol</th>
+                <th>Permisos</th>
             </tr>
         </thead>
         <tbody>
@@ -97,7 +97,7 @@
         </tbody>
     </table>
 
-    <h3>Update Role Permissions</h3>
+    <h3>Actualizar permisos del rol</h3>
     <form asp-action="UpdateRolePermissions" method="post" class="auth-form">
         @Html.AntiForgeryToken()
 
@@ -108,14 +108,14 @@
         </div>
 
         <div class="form-group">
-            <label>Permissions (comma separated)</label>
+            <label>Permisos (separados por coma)</label>
             <input asp-for="UpdateRoleForm.PermissionsRaw" />
         </div>
 
-        <button type="submit">Update role</button>
+        <button type="submit">Actualizar rol</button>
     </form>
 
-    <h3>Permission Catalog</h3>
+    <h3>Catálogo de permisos</h3>
     <p>@string.Join(", ", Model.PermissionCatalog)</p>
 </section>
 

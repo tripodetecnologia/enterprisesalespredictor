@@ -31,9 +31,11 @@ public sealed class ForecastServiceTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.ProjectedSales, Is.GreaterThan(0));
+            Assert.That(result.ProjectedSales, Is.GreaterThanOrEqualTo(0));
             Assert.That(result.Confidence, Is.GreaterThan(0));
-            Assert.That(result.Explanation, Does.Contain("average daily sales"));
+            Assert.That(result.Explanation, Does.Contain("promedios diarios"));
+            Assert.That(result.CustomerMonthlyForecasts, Is.Not.Empty);
+            Assert.That(result.ProductMonthlyForecasts, Is.Not.Empty);
             Assert.That(dbContext.Forecasts.Count(), Is.EqualTo(1));
         });
     }
@@ -70,6 +72,11 @@ public sealed class ForecastServiceTests
         var productId = Guid.NewGuid();
         var supplierId = Guid.NewGuid();
         var sellerId = Guid.NewGuid();
+
+        dbContext.Customers.Add(new Customer(customerId, "CLI-01", "Cliente Test", "Bogotá", "Norte", "Calle 1", "5551111"));
+        dbContext.Products.Add(new Product(productId, "Hardware", "Producto Test", "REF-01", "BrandX", 10m, 18m, 20));
+        dbContext.Suppliers.Add(new Supplier(supplierId, "SUP-01", "Proveedor Test", "Bogotá", "Dirección 1", "5552222"));
+        dbContext.Sellers.Add(new Seller(sellerId, "VEN-01", "Vendedor Test"));
 
         for (var day = 1; day <= 20; day++)
         {

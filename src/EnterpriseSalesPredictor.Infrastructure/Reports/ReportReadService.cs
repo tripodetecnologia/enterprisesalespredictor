@@ -24,12 +24,12 @@ public sealed class ReportReadService : IReportReadService
         var activeCustomers = await sales.Select(sale => sale.CustomerId).Distinct().CountAsync(cancellationToken);
 
         return BuildReport(
-            "Management Report",
-            CreateSection("Executive Summary",
-                Metric("Total sales", totalSales),
-                Metric("Transactions", totalTransactions),
-                Metric("Average ticket", averageTicket),
-                Metric("Active customers", activeCustomers)));
+            "Reporte gerencial",
+            CreateSection("Resumen ejecutivo",
+                Metric("Ventas totales", totalSales),
+                Metric("Transacciones", totalTransactions),
+                Metric("Ticket promedio", averageTicket),
+                Metric("Clientes activos", activeCustomers)));
     }
 
     public async Task<ReportDto> GetCommercialReportAsync(ReportQueryCriteria criteria, CancellationToken cancellationToken = default)
@@ -58,14 +58,14 @@ public sealed class ReportReadService : IReportReadService
             .FirstOrDefaultAsync(cancellationToken);
 
         return BuildReport(
-            "Commercial Report",
-            CreateSection("Top Commercial Drivers",
-                Metric("Top seller", topSeller?.Name ?? "N/A"),
-                Metric("Seller sales", topSeller?.Amount ?? 0m),
-                Metric("Top product", topProduct?.Name ?? "N/A"),
-                Metric("Product sales", topProduct?.Amount ?? 0m),
-                Metric("Top customer", topCustomer?.Name ?? "N/A"),
-                Metric("Customer sales", topCustomer?.Amount ?? 0m)));
+            "Reporte comercial",
+            CreateSection("Principales impulsores comerciales",
+                Metric("Mejor vendedor", topSeller?.Name ?? "Sin dato"),
+                Metric("Ventas del vendedor", topSeller?.Amount ?? 0m),
+                Metric("Mejor producto", topProduct?.Name ?? "Sin dato"),
+                Metric("Ventas del producto", topProduct?.Amount ?? 0m),
+                Metric("Mejor cliente", topCustomer?.Name ?? "Sin dato"),
+                Metric("Ventas del cliente", topCustomer?.Amount ?? 0m)));
     }
 
     public async Task<ReportDto> GetOperationalReportAsync(ReportQueryCriteria criteria, CancellationToken cancellationToken = default)
@@ -78,12 +78,12 @@ public sealed class ReportReadService : IReportReadService
         var failedOrWarningUploads = uploads.Count(upload => upload.Status != UploadProcessStatus.Completed);
 
         return BuildReport(
-            "Operational Report",
-            CreateSection("Operational Health",
-                Metric("Registered uploads", uploads.Count),
-                Metric("Uploads with issues", failedOrWarningUploads),
-                Metric("Audit events", auditCount),
-                Metric("Last upload status", uploads.FirstOrDefault()?.Status.ToString() ?? "N/A")));
+            "Reporte operativo",
+            CreateSection("Salud operativa",
+                Metric("Cargas registradas", uploads.Count),
+                Metric("Cargas con incidencias", failedOrWarningUploads),
+                Metric("Eventos de auditoría", auditCount),
+                Metric("Último estado de carga", uploads.FirstOrDefault()?.Status.ToString() ?? "Sin dato")));
     }
 
     public async Task<ReportDto> GetReplenishmentReportAsync(ReportQueryCriteria criteria, CancellationToken cancellationToken = default)
@@ -95,12 +95,12 @@ public sealed class ReportReadService : IReportReadService
         var rejected = await recommendations.CountAsync(item => item.Status == RecommendationStatus.Rejected, cancellationToken);
 
         return BuildReport(
-            "Replenishment Report",
-            CreateSection("Recommendation Status",
-                Metric("Total recommendations", total),
-                Metric("Pending", pending),
-                Metric("Approved", approved),
-                Metric("Rejected", rejected)));
+            "Reporte de abastecimiento",
+            CreateSection("Estado de recomendaciones",
+                Metric("Total de recomendaciones", total),
+                Metric("Pendientes", pending),
+                Metric("Aprobadas", approved),
+                Metric("Rechazadas", rejected)));
     }
 
     public async Task<ReportDto> GetPredictiveReportAsync(ReportQueryCriteria criteria, CancellationToken cancellationToken = default)
@@ -122,11 +122,11 @@ public sealed class ReportReadService : IReportReadService
         var projectedSales = await forecasts.SumAsync(item => (decimal?)item.ProjectedSales, cancellationToken) ?? 0m;
 
         return BuildReport(
-            "Predictive Report",
-            CreateSection("Forecast Summary",
-                Metric("Registered forecasts", totalForecasts),
-                Metric("Projected sales", projectedSales),
-                Metric("Average confidence", averageConfidence)));
+            "Reporte predictivo",
+            CreateSection("Resumen de proyecciones",
+                Metric("Proyecciones registradas", totalForecasts),
+                Metric("Ventas proyectadas", projectedSales),
+                Metric("Confianza promedio", averageConfidence)));
     }
 
     private static IQueryable<Sale> ApplyDateFilters(IQueryable<Sale> query, ReportQueryCriteria criteria)

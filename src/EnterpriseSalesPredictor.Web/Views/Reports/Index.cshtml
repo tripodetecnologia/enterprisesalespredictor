@@ -1,19 +1,19 @@
 @model EnterpriseSalesPredictor.Web.ViewModels.Reports.ReportsPageViewModel
 
 @{
-    ViewData["Title"] = "Reports";
+    ViewData["Title"] = "Reportes";
 }
 
 <section class="hero">
-    <h1>Enterprise Reports</h1>
-    <p>Review management, commercial, operational, replenishment, and predictive reports from a single screen.</p>
+    <h1>Reportes empresariales</h1>
+    <p>Revisá reportes gerenciales, comerciales, operativos, de abastecimiento y predictivos desde una sola pantalla.</p>
     <div class="filter-panel">
         <partial name="_ReportFilters" model="Model.Filters" />
     </div>
 
     <div class="page-actions">
-        <button type="button" id="reports-export-button" class="button">Export reports workbook</button>
-        <button type="button" id="base-data-export-button" class="button button-secondary">Export base data</button>
+        <button type="button" id="reports-export-button" class="button">Exportar libro de reportes</button>
+        <button type="button" id="base-data-export-button" class="button button-secondary">Exportar datos base</button>
     </div>
 </section>
 
@@ -27,8 +27,8 @@
     <partial name="_ReportCard" model="Model.PredictiveReport" />
 </section>
 
-<partial name="_Modal" model='new ModalViewModel { Id = "reports-export-modal", Title = "Export Reports", Message = "Download the current reports workbook?", ConfirmLabel = "Export", CancelLabel = "Cancel" }' />
-<partial name="_Modal" model='new ModalViewModel { Id = "base-data-export-modal", Title = "Export Base Data", Message = "Download the full base data workbook?", ConfirmLabel = "Download", CancelLabel = "Cancel" }' />
+<partial name="_Modal" model='new ModalViewModel { Id = "reports-export-modal", Title = "Exportar reportes", Message = "¿Querés descargar el libro de reportes actual?", ConfirmLabel = "Exportar", CancelLabel = "Cancelar" }' />
+<partial name="_Modal" model='new ModalViewModel { Id = "base-data-export-modal", Title = "Exportar datos base", Message = "¿Querés descargar el libro completo de datos base?", ConfirmLabel = "Descargar", CancelLabel = "Cancelar" }' />
 
 @section Scripts {
     <script src="~/js/pages/reports-index.js" asp-append-version="true"></script>

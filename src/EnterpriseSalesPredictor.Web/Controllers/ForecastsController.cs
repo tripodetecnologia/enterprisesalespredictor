@@ -17,15 +17,25 @@ public sealed class ForecastsController : Controller
         _forecastsApiClient = forecastsApiClient;
     }
 
-    [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        return View(new ForecastPageViewModel());
+        var viewModel = await _forecastsApiClient.GetOptionsAsync(cancellationToken);
+        return View(viewModel);
     }
 
     [HttpPost]
     public async Task<IActionResult> Generate([FromBody] ForecastRequestViewModel request, CancellationToken cancellationToken)
     {
+        if (!request.FromDate.HasValue)
+        {
+            return BadRequest("La fecha de inicio es obligatoria.");
+        }
+
+        if (!request.ToDate.HasValue)
+        {
+            return BadRequest("La fecha de fin es obligatoria.");
+        }
+
         var result = await _forecastsApiClient.GenerateForecastAsync(request, cancellationToken);
         return Json(result);
     }

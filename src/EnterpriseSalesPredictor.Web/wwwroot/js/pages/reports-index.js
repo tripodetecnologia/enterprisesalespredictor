@@ -11,19 +11,19 @@
 
             reportsButton.addEventListener("click", async function () {
                 await namespace.appUi.confirm("reports-export-modal", async function () {
-                    await downloadWithState(reportsButton, "Preparing reports export...", buildReportUrl());
+                    await downloadWithState(reportsButton, "Preparando la exportación de reportes...", buildReportUrl());
                 });
             });
 
             baseDataButton.addEventListener("click", async function () {
                 await namespace.appUi.confirm("base-data-export-modal", async function () {
-                    await downloadWithState(baseDataButton, "Preparing base data export...", "/Exports/BaseData");
+                    await downloadWithState(baseDataButton, "Preparando la exportación de datos base...", "/Exports/BaseData");
                 });
             });
 
             async function downloadWithState(button, message, url) {
                 button.disabled = true;
-                namespace.Modules.statePanels.showAlert(statusSection, "info", "Exporting", message);
+                namespace.Modules.statePanels.showAlert(statusSection, "info", "Exportando", message);
 
                 try {
                     var result = await namespace.Utils.http.fetchBlob(url, {
@@ -33,10 +33,10 @@
                     });
 
                     namespace.Modules.downloads.saveBlob(result.blob, result.fileName || "export.xlsx");
-                    namespace.Modules.statePanels.showAlert(statusSection, "success", "Completed", "Export downloaded successfully.");
-                    namespace.appUi.toast("Export downloaded.", "success");
+                    namespace.Modules.statePanels.showAlert(statusSection, "success", "Completado", "La exportación se descargó correctamente.");
+                    namespace.appUi.toast("La exportación se descargó correctamente.", "success");
                 } catch (error) {
-                    namespace.Modules.statePanels.showAlert(statusSection, "error", "Export failed", error.message || "Export failed.");
+                    namespace.Modules.statePanels.showAlert(statusSection, "error", "Exportación fallida", error.message || "La exportación falló.");
                 } finally {
                     button.disabled = false;
                 }

@@ -2,9 +2,11 @@ using EnterpriseSalesPredictor.Application;
 using EnterpriseSalesPredictor.Infrastructure;
 using EnterpriseSalesPredictor.Api.Middlewares;
 using EnterpriseSalesPredictor.Api.Authorization;
+using EnterpriseSalesPredictor.Infrastructure.Persistence;
 using EnterpriseSalesPredictor.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -44,6 +46,9 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.MigrateAsync();
+
     var securityBootstrapper = scope.ServiceProvider.GetRequiredService<ISecurityBootstrapper>();
     await securityBootstrapper.EnsureSeededAsync();
 }

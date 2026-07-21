@@ -56,7 +56,7 @@ public sealed class UploadsController : Controller
 
             var viewModel = await BuildPageModelAsync(cancellationToken);
             viewModel.LastResult = result;
-            viewModel.StatusMessage = "Upload completed.";
+            viewModel.StatusMessage = "La carga se completó correctamente.";
             return View("Index", viewModel);
         }
         catch (Exception exception)
@@ -72,7 +72,7 @@ public sealed class UploadsController : Controller
     public async Task<IActionResult> Errors(Guid id, CancellationToken cancellationToken)
     {
         var errors = await _uploadsApiClient.GetUploadErrorsAsync(id, cancellationToken);
-        ViewData["Title"] = "Upload Error Details";
+        ViewData["Title"] = "Detalle de errores de carga";
         ViewData["UploadId"] = id;
         return View(errors);
     }
@@ -93,19 +93,19 @@ public sealed class UploadsController : Controller
 
         if (file is null)
         {
-            errorMessage = "Please select a file to upload.";
+            errorMessage = "Seleccioná un archivo para cargar.";
             return false;
         }
 
         if (file.Length <= 0)
         {
-            errorMessage = "Selected file is empty.";
+            errorMessage = "El archivo seleccionado está vacío.";
             return false;
         }
 
         if (file.Length > MaxUploadSizeBytes)
         {
-            errorMessage = "File exceeds the maximum allowed size of 20 MB.";
+            errorMessage = "El archivo supera el tamaño máximo permitido de 20 MB.";
             return false;
         }
 
@@ -122,7 +122,7 @@ public sealed class UploadsController : Controller
             return true;
         }
 
-        errorMessage = "Unsupported file extension. Allowed: .xlsx, .xls, .csv, .txt.";
+        errorMessage = "Extensión de archivo no soportada. Permitidas: .xlsx, .xls, .csv, .txt.";
         return false;
     }
 }

@@ -74,11 +74,25 @@ public sealed class ExcelExportService : IExportService
     {
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("FilteredSales");
-        var sales = await _salesReadService.QuerySalesAsync(criteria, cancellationToken);
+        var sales = await _salesReadService.QuerySalesAsync(new SalesQueryCriteria
+        {
+            FromDate = criteria.FromDate,
+            ToDate = criteria.ToDate,
+            CustomerId = criteria.CustomerId,
+            ProductId = criteria.ProductId,
+            SupplierId = criteria.SupplierId,
+            SellerId = criteria.SellerId,
+            City = criteria.City,
+            Zone = criteria.Zone,
+            PageNumber = 1,
+            PageSize = int.MaxValue,
+            SortBy = criteria.SortBy,
+            SortDirection = criteria.SortDirection
+        }, cancellationToken);
 
         WriteSalesHeader(worksheet);
         var row = 2;
-        foreach (var sale in sales)
+        foreach (var sale in sales.Items)
         {
             worksheet.Cell(row, 1).Value = sale.Id.ToString();
             worksheet.Cell(row, 2).Value = sale.InvoiceNumber;

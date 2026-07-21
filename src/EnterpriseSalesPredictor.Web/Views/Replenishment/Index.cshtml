@@ -1,12 +1,12 @@
-@model EnterpriseSalesPredictor.Web.ViewModels.Replenishment.ReplenishmentPageViewModel
+@model EnterpriseSalesPredictor.Web.ViewModels.Replenishment.ReplenishmentProjectionPageViewModel
 
 @{
-    ViewData["Title"] = "Replenishment Recommendations";
+    ViewData["Title"] = "Proyección de abastecimiento";
 }
 
 <section class="hero">
-    <h1>Replenishment Recommendations</h1>
-    <p>Generate and review stock replenishment recommendations with controlled approval workflow.</p>
+    <h1>Proyección de abastecimiento</h1>
+    <p>Seleccioná un rango futuro de meses y, opcionalmente, un cliente o producto para estimar necesidades de compra.</p>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
@@ -18,51 +18,111 @@
         <div class="auth-error">@Model.ErrorMessage</div>
     }
 
-    <form asp-action="Generate" method="post" class="auth-form">
-        @Html.AntiForgeryToken()
+    <form asp-action="Index" method="get" class="audit-filters">
         <div class="form-group">
-            <label asp-for="GenerateForm.ProductId">Product Id</label>
-            <input asp-for="GenerateForm.ProductId" />
-            <span asp-validation-for="GenerateForm.ProductId" class="field-error"></span>
+            <label asp-for="Filters.FromDate">Desde</label>
+            <input asp-for="Filters.FromDate" type="date" />
+            <span asp-validation-for="Filters.FromDate" class="field-error"></span>
         </div>
-        <button type="submit">Generate recommendation</button>
+
+        <div class="form-group">
+            <label asp-for="Filters.ToDate">Hasta</label>
+            <input asp-for="Filters.ToDate" type="date" />
+            <span asp-validation-for="Filters.ToDate" class="field-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Filters.CustomerId">Cliente</label>
+            <select asp-for="Filters.CustomerId">
+                <option value="">Todos los clientes</option>
+                @foreach (var customer in Model.Customers)
+                {
+                    <option value="@customer.Id">@customer.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Filters.ProductId">Producto</label>
+            <select asp-for="Filters.ProductId">
+                <option value="">Todos los productos</option>
+                @foreach (var product in Model.Products)
+                {
+                    <option value="@product.Id">@product.Name</option>
+                }
+            </select>
+        </div>
+
+        <button type="submit">Consultar abastecimiento</button>
     </form>
 </section>
 
-<section class="hero">
-    <h2>Current Recommendations</h2>
+<section class="hero table-card">
+    <h2>Resultado proyectado</h2>
 
-    @if (Model.Recommendations.Count == 0)
+    @if (!Model.Filters.FromDate.HasValue || !Model.Filters.ToDate.HasValue)
     {
-        <p>No recommendations have been generated yet.</p>
+        <p>Seleccioná el rango de fechas y hacé clic en consultar abastecimiento para ver resultados.</p>
+    }
+    else if (Model.Results.TotalCount == 0)
+    {
+        <p>No se encontraron necesidades de abastecimiento para el rango seleccionado.</p>
     }
     else
     {
+        <p>Mostrando @(((Model.Results.PageNumber - 1) * Model.Results.PageSize) + 1) a @Math.Min(Model.Results.PageNumber * Model.Results.PageSize, Model.Results.TotalCount) de @Model.Results.TotalCount registros.</p>
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Generated At</th>
-                    <th>Product Id</th>
-                    <th>Recommended Units</th>
-                    <th>Confidence</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>Fecha proyección abastecimiento</th>
+                    <th>Nombre del producto</th>
+                    <th>Cantidad proyectada para abastecer</th>
+                    <th>Cantidad actual del producto en stock</th>
+                    <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
-            @foreach (var item in Model.Recommendations)
+            @foreach (var item in Model.Results.Items)
             {
                 <tr>
-                    <td>@item.GeneratedAtUtc.ToString("u")</td>
-                    <td>@item.ProductId</td>
+                    <td>@item.ProjectionMonth.ToString("yyyy-MM")</td>
+                    <td>@item.ProductName</td>
                     <td>@item.RecommendedUnits.ToString("N2")</td>
-                    <td>@item.Confidence.ToString("P0")</td>
-                    <td><span class="status-pill status-pill-@item.Status.ToLowerInvariant()">@item.Status</span></td>
-                    <td><a asp-action="Detail" asp-route-id="@item.Id">Review details</a></td>
+                    <td>@item.CurrentStockUnits</td>
+                    <td>
+                        <form asp-action="Submit" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="ProjectionMonth" value="@item.ProjectionMonth.ToString("O")" />
+                            <input type="hidden" name="ProductId" value="@item.ProductId" />
+                            <input type="hidden" name="ProductName" value="@item.ProductName" />
+                            <input type="hidden" name="RecommendedUnits" value="@item.RecommendedUnits" />
+                            <input type="hidden" name="CurrentStockUnits" value="@item.CurrentStockUnits" />
+                            <input type="hidden" name="fromDate" value="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="toDate" value="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="customerId" value="@Model.Filters.CustomerId" />
+                            <input type="hidden" name="productId" value="@Model.Filters.ProductId" />
+                            <input type="hidden" name="pageNumber" value="@Model.Results.PageNumber" />
+                            <button type="submit" class="button button-secondary">Enviar a aprobación</button>
+                        </form>
+                    </td>
                 </tr>
             }
             </tbody>
         </table>
+
+        <div class="page-actions sales-pagination-bar">
+            @if (Model.Results.PageNumber > 1)
+            {
+                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")" asp-route-customerId="@Model.Filters.CustomerId" asp-route-productId="@Model.Filters.ProductId" asp-route-pageNumber="@(Model.Results.PageNumber - 1)">Anterior</a>
+            }
+
+            <span>Página @Model.Results.PageNumber de @Math.Max(Model.Results.TotalPages, 1)</span>
+
+            @if (Model.Results.PageNumber < Model.Results.TotalPages)
+            {
+                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")" asp-route-customerId="@Model.Filters.CustomerId" asp-route-productId="@Model.Filters.ProductId" asp-route-pageNumber="@(Model.Results.PageNumber + 1)">Siguiente</a>
+            }
+        </div>
     }
 </section>
 

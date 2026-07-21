@@ -18,98 +18,52 @@ public sealed class ReplenishmentController : Controller
 
     [HttpGet]
     [RequirePermission("replenishment:read")]
-    public async Task<IActionResult> Index(CancellationToken cancellationToken)
+    public async Task<IActionResult> Index([FromQuery] ReplenishmentProjectionFilterViewModel filters, int pageNumber = 1, CancellationToken cancellationToken = default)
     {
-        var viewModel = await BuildPageModelAsync(cancellationToken);
+        var viewModel = await BuildPageModelAsync(filters, pageNumber, cancellationToken);
         return View(viewModel);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     [RequirePermission("replenishment:write")]
-    public async Task<IActionResult> Generate(GenerateRecommendationFormViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Submit(ReplenishmentProjectionViewModel model, ReplenishmentProjectionFilterViewModel filters, int pageNumber = 1, CancellationToken cancellationToken = default)
     {
-        if (!ModelState.IsValid || !model.ProductId.HasValue)
-        {
-            var invalidModel = await BuildPageModelAsync(cancellationToken);
-            invalidModel.GenerateForm = model;
-            invalidModel.ErrorMessage = "Please provide a valid product id.";
-            return View("Index", invalidModel);
-        }
-
         try
         {
-            await _replenishmentApiClient.GenerateRecommendationAsync(model.ProductId.Value, cancellationToken);
-            TempData["StatusMessage"] = "Recommendation generated successfully.";
-            return RedirectToAction(nameof(Index));
+            await _replenishmentApiClient.SubmitProjectionAsync(model, cancellationToken);
+            TempData["StatusMessage"] = "Sugerencia enviada a aprobación correctamente.";
+            return RedirectToAction(nameof(Index), new
+            {
+                fromDate = filters.FromDate?.ToString("yyyy-MM-dd"),
+                toDate = filters.ToDate?.ToString("yyyy-MM-dd"),
+                customerId = filters.CustomerId,
+                productId = filters.ProductId,
+                pageNumber
+            });
         }
         catch (Exception exception)
         {
-            var errorModel = await BuildPageModelAsync(cancellationToken);
-            errorModel.GenerateForm = model;
+            var errorModel = await BuildPageModelAsync(filters, pageNumber, cancellationToken);
             errorModel.ErrorMessage = exception.Message;
             return View("Index", errorModel);
         }
     }
 
-    [HttpGet]
-    [RequirePermission("replenishment:read")]
-    public async Task<IActionResult> Detail(Guid id, CancellationToken cancellationToken)
+    private async Task<ReplenishmentProjectionPageViewModel> BuildPageModelAsync(ReplenishmentProjectionFilterViewModel filters, int pageNumber, CancellationToken cancellationToken)
     {
-        var recommendation = await GetRecommendationAsync(id, cancellationToken);
-        if (recommendation is null)
-        {
-            return RedirectToAction("NotFoundPage", "Home");
-        }
+        var options = await _replenishmentApiClient.GetOptionsAsync(cancellationToken);
+        var results = (!filters.FromDate.HasValue || !filters.ToDate.HasValue)
+            ? new PagedReplenishmentProjectionResultViewModel()
+            : await _replenishmentApiClient.GetProjectionsAsync(filters, pageNumber, cancellationToken);
 
-        return View(new ReplenishmentDetailPageViewModel
+        return new ReplenishmentProjectionPageViewModel
         {
-            Recommendation = recommendation,
-            ReviewForm = new ReviewRecommendationFormViewModel { RecommendationId = id },
-            StatusMessage = TempData["StatusMessage"] as string
-        });
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    [RequirePermission("replenishment:write")]
-    public async Task<IActionResult> Review(ReviewRecommendationFormViewModel model, CancellationToken cancellationToken)
-    {
-        var recommendation = await GetRecommendationAsync(model.RecommendationId, cancellationToken);
-        if (recommendation is null)
-        {
-            return RedirectToAction("NotFoundPage", "Home");
-        }
-
-        try
-        {
-            await _replenishmentApiClient.ReviewRecommendationAsync(model.RecommendationId, model.Action, model.Notes, cancellationToken);
-            TempData["StatusMessage"] = "Recommendation updated successfully.";
-            return RedirectToAction(nameof(Detail), new { id = model.RecommendationId });
-        }
-        catch (Exception exception)
-        {
-            return View("Detail", new ReplenishmentDetailPageViewModel
-            {
-                Recommendation = recommendation,
-                ReviewForm = model,
-                ErrorMessage = exception.Message
-            });
-        }
-    }
-
-    private async Task<ReplenishmentPageViewModel> BuildPageModelAsync(CancellationToken cancellationToken)
-    {
-        return new ReplenishmentPageViewModel
-        {
-            Recommendations = await _replenishmentApiClient.GetRecommendationsAsync(cancellationToken),
+            Filters = filters,
+            Results = results,
+            Customers = options.Customers,
+            Products = options.Products,
             StatusMessage = TempData["StatusMessage"] as string
         };
-    }
-
-    private async Task<ReplenishmentRecommendationViewModel?> GetRecommendationAsync(Guid id, CancellationToken cancellationToken)
-    {
-        var recommendations = await _replenishmentApiClient.GetRecommendationsAsync(cancellationToken);
-        return recommendations.FirstOrDefault(item => item.Id == id);
     }
 }
