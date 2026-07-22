@@ -25,9 +25,10 @@ public sealed class ReplenishmentService : IReplenishmentService
         ValidateProjectionRange(criteria.FromDate, criteria.ToDate);
 
         var productsQuery = _dbContext.Products.AsNoTracking().AsQueryable();
-        if (criteria.ProductId.HasValue)
+        if (!string.IsNullOrWhiteSpace(criteria.ProductName))
         {
-            productsQuery = productsQuery.Where(item => item.Id == criteria.ProductId.Value);
+            var productName = criteria.ProductName.Trim();
+            productsQuery = productsQuery.Where(item => item.Name == productName);
         }
 
         var products = await productsQuery.OrderBy(item => item.Name).ToListAsync(cancellationToken);
@@ -72,7 +73,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         {
             throw new ValidationException(new[]
             {
-                new ValidationError(nameof(command.ProductId), "Producto no encontrado.")
+                new ValidationError(nameof(command.ProductId), ReplenishmentMessages.ProductNotFound)
             });
         }
 
@@ -80,7 +81,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         {
             throw new ValidationException(new[]
             {
-                new ValidationError(nameof(command.RecommendedUnits), "La cantidad recomendada debe ser mayor a cero.")
+                new ValidationError(nameof(command.RecommendedUnits), ReplenishmentMessages.RecommendedUnitsMustBeGreaterThanZero)
             });
         }
 
@@ -97,7 +98,7 @@ public sealed class ReplenishmentService : IReplenishmentService
             existing.Refresh(command.RecommendedUnits, confidence, rationale);
             await _dbContext.SaveChangesAsync(cancellationToken);
             await RegisterSubmittedAuditAsync(command.RequestedBy, existing, cancellationToken);
-            return Map(existing, product.Name);
+            return Map(existing, product);
         }
 
         var recommendation = new ReplenishmentRecommendation(
@@ -112,7 +113,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         await _dbContext.ReplenishmentRecommendations.AddAsync(recommendation, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
         await RegisterSubmittedAuditAsync(command.RequestedBy, recommendation, cancellationToken);
-        return Map(recommendation, product.Name);
+        return Map(recommendation, product);
     }
 
     public async Task<IReadOnlyCollection<ReplenishmentRecommendationDto>> GenerateRecommendationAsync(GenerateReplenishmentCommand command, CancellationToken cancellationToken = default)
@@ -151,7 +152,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         {
             throw new ValidationException(new[]
             {
-                new ValidationError(nameof(command.RecommendationId), "Recommendation not found.")
+                new ValidationError(nameof(command.RecommendationId), ReplenishmentMessages.RecommendationNotFound)
             });
         }
 
@@ -159,7 +160,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         {
             throw new ValidationException(new[]
             {
-                new ValidationError(nameof(command.ReviewerRole), "Reviewer role is not allowed to approve or reject recommendations.")
+                new ValidationError(nameof(command.ReviewerRole), ReplenishmentMessages.ReviewerRoleNotAllowed)
             });
         }
 
@@ -181,7 +182,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         {
             throw new ValidationException(new[]
             {
-                new ValidationError(nameof(command.Action), "Review action must be approve, reject, or analysis.")
+                new ValidationError(nameof(command.Action), ReplenishmentMessages.InvalidReviewAction)
             });
         }
 
@@ -195,7 +196,7 @@ public sealed class ReplenishmentService : IReplenishmentService
             Details = $"RecommendationId={recommendation.Id}; Notes={command.Notes}"
         }, cancellationToken);
 
-        return Map(recommendation, recommendation.Product?.Name ?? recommendation.ProductId.ToString());
+        return Map(recommendation, recommendation.Product);
     }
 
     public async Task<PagedReplenishmentResultDto> GetRecommendationsAsync(ReplenishmentQueryCriteria criteria, CancellationToken cancellationToken = default)
@@ -234,7 +235,7 @@ public sealed class ReplenishmentService : IReplenishmentService
 
         return new PagedReplenishmentResultDto
         {
-            Items = items.Select(item => Map(item, item.Product?.Name ?? item.ProductId.ToString())).ToArray(),
+            Items = items.Select(item => Map(item, item.Product)).ToArray(),
             PageNumber = pageNumber,
             PageSize = pageSize,
             TotalCount = totalCount,
@@ -244,7 +245,8 @@ public sealed class ReplenishmentService : IReplenishmentService
 
     private async Task<ReplenishmentProjectionDto?> BuildProjectionAsync(Product product, (DateTime MonthStart, int Days) month, Guid? customerId, CancellationToken cancellationToken)
     {
-        var lookbackStart = month.MonthStart.AddDays(-90);
+        int daysLookBack = 365;
+        var lookbackStart = month.MonthStart.AddDays(-daysLookBack);
         var salesQuery = _dbContext.Sales.AsNoTracking()
             .Where(item => item.ProductId == product.Id && item.SaleDate >= lookbackStart && item.SaleDate < month.MonthStart);
 
@@ -277,6 +279,9 @@ public sealed class ReplenishmentService : IReplenishmentService
             ProjectionMonth = month.MonthStart,
             ProductId = product.Id,
             ProductName = product.Name,
+            ProductType = product.ProductType,
+            ProductReference = product.Reference,
+            ProductBrand = product.Brand,
             RecommendedUnits = recommendedUnits,
             CurrentStockUnits = availableUnits,
             Confidence = confidence,
@@ -290,7 +295,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         {
             throw new ValidationException(new[]
             {
-                new ValidationError(nameof(fromDate), "Debés indicar un rango de fechas válido.")
+                new ValidationError(nameof(fromDate), ReplenishmentMessages.InvalidDateRange)
             });
         }
 
@@ -302,7 +307,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         {
             throw new ValidationException(new[]
             {
-                new ValidationError(nameof(fromDate), "Las fechas de proyección deben ser futuras.")
+                new ValidationError(nameof(fromDate), ReplenishmentMessages.ProjectionDatesMustBeFuture)
             });
         }
 
@@ -310,7 +315,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         {
             throw new ValidationException(new[]
             {
-                new ValidationError(nameof(toDate), $"El rango debe estar entre {ForecastRules.MinimumForecastDays} y {ForecastRules.MaximumForecastDays} días.")
+                new ValidationError(nameof(toDate), ReplenishmentMessages.ProjectionRangeOutOfBounds(ForecastRules.MinimumForecastDays, ForecastRules.MaximumForecastDays))
             });
         }
     }
@@ -381,7 +386,7 @@ public sealed class ReplenishmentService : IReplenishmentService
             existing.Refresh(recommendedUnits, confidence, string.Join(' ', rationaleParts));
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return Map(existing, product.Name);
+            return Map(existing, product);
         }
 
         var recommendation = new ReplenishmentRecommendation(
@@ -404,7 +409,7 @@ public sealed class ReplenishmentService : IReplenishmentService
             Details = $"RecommendationId={recommendation.Id}; ProductId={product.Id}; Month={monthMarker:yyyy-MM}; ProjectedDemand={projectedDemand}; AvailableUnits={availableUnits}; RecommendedUnits={recommendedUnits}; Confidence={confidence}"
         }, cancellationToken);
 
-        return Map(recommendation, product.Name);
+        return Map(recommendation, product);
     }
 
     private static IReadOnlyCollection<(DateTime MonthStart, int Days)> BuildMonthSlices(DateTime fromDate, DateTime toDate)
@@ -431,13 +436,16 @@ public sealed class ReplenishmentService : IReplenishmentService
         return slices;
     }
 
-    private static ReplenishmentRecommendationDto Map(ReplenishmentRecommendation recommendation, string productName)
+    private static ReplenishmentRecommendationDto Map(ReplenishmentRecommendation recommendation, Product? product)
     {
         return new ReplenishmentRecommendationDto
         {
             Id = recommendation.Id,
             ProductId = recommendation.ProductId,
-            ProductName = productName,
+            ProductName = product?.Name ?? recommendation.ProductId.ToString(),
+            ProductType = product?.ProductType ?? string.Empty,
+            ProductReference = product?.Reference ?? string.Empty,
+            ProductBrand = product?.Brand ?? string.Empty,
             GeneratedAtUtc = recommendation.GeneratedAtUtc,
             RecommendedForMonth = recommendation.RecommendedForMonth,
             RecommendedUnits = recommendation.RecommendedUnits,

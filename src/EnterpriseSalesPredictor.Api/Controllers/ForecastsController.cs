@@ -42,7 +42,7 @@ public sealed class ForecastsController : ControllerBase
         {
             FromDate = request.FromDate.Value,
             ToDate = request.ToDate.Value,
-            ProductId = request.ProductId,
+            ProductName = request.ProductName,
             CustomerId = request.CustomerId,
             RequestedBy = User.Identity?.Name ?? "system"
         }, cancellationToken);

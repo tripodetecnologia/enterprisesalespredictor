@@ -6,7 +6,7 @@
 
 <section class="hero">
     <h1>Proyección de ventas</h1>
-    <p>Seleccioná un rango de fechas para proyectar ventas mensuales por cliente y por producto.</p>
+    <p>Selecciona un rango de fechas para proyectar ventas mensuales por cliente y por producto.</p>
 
     <form id="forecast-form" class="audit-filters">
         <div class="form-group">
@@ -33,14 +33,15 @@
         </div>
 
         <div class="form-group">
-            <label asp-for="Filters.ProductId">Producto</label>
-            <select asp-for="Filters.ProductId">
-                <option value="">Todos los productos</option>
+            <label asp-for="Filters.ProductName">Producto</label>
+            <select asp-for="Filters.ProductName">
+                <option value="">Seleccione...</option>
                 @foreach (var product in Model.Products)
                 {
-                    <option value="@product.Id">@product.Name</option>
+                    <option value="@product.Name">@product.Name</option>
                 }
             </select>
+            <span asp-validation-for="Filters.ProductName" class="field-error"></span>
         </div>
 
         <button type="submit">Generar proyección</button>
@@ -67,7 +68,7 @@
         </thead>
         <tbody>
             <tr>
-                <td id="forecast-projected-sales">0.00</td>
+                <td id="forecast-projected-sales">0</td>
                 <td id="forecast-confidence">0%</td>
                 <td id="forecast-generated-at">-</td>
                 <td id="forecast-generated-by">-</td>

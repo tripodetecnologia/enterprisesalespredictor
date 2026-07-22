@@ -37,9 +37,8 @@ public sealed class ReplenishmentApprovalsController : Controller
         }
         catch (Exception exception)
         {
-            var viewModel = await BuildPageModelAsync(fromDate, toDate, productId, pageNumber, cancellationToken);
-            viewModel.ErrorMessage = exception.Message;
-            return View("Index", viewModel);
+            TempData["ErrorMessage"] = exception.Message;
+            return RedirectToAction(nameof(Index), new { fromDate = fromDate?.ToString("yyyy-MM-dd"), toDate = toDate?.ToString("yyyy-MM-dd"), productId, pageNumber });
         }
     }
 

@@ -8,6 +8,12 @@ public sealed class ReplenishmentRecommendationViewModel
 
     public string ProductName { get; set; } = string.Empty;
 
+    public string ProductType { get; set; } = string.Empty;
+
+    public string ProductReference { get; set; } = string.Empty;
+
+    public string ProductBrand { get; set; } = string.Empty;
+
     public DateTime GeneratedAtUtc { get; set; }
 
     public DateTime RecommendedForMonth { get; set; }

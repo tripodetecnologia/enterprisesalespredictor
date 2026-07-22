@@ -52,6 +52,17 @@ public sealed class ForecastService : IForecastService
         var historicalSales = _dbContext.Sales.AsNoTracking()
             .Where(sale => sale.SaleDate.Date >= lookbackStart && sale.SaleDate.Date < query.FromDate.Date);
 
+        if (!string.IsNullOrWhiteSpace(query.ProductName))
+        {
+            var productName = query.ProductName.Trim();
+            var productIds = await _dbContext.Products.AsNoTracking()
+                .Where(item => item.Name == productName)
+                .Select(item => item.Id)
+                .ToArrayAsync(cancellationToken);
+
+            historicalSales = historicalSales.Where(sale => productIds.Contains(sale.ProductId));
+        }
+
         var customerForecasts = await BuildCustomerMonthlyForecastsAsync(historicalSales, query, cancellationToken);
         var productForecasts = await BuildProductMonthlyForecastsAsync(historicalSales, query, cancellationToken);
 
@@ -116,14 +127,20 @@ public sealed class ForecastService : IForecastService
             })
             .ToArrayAsync(cancellationToken);
 
-        var products = await _dbContext.Products.AsNoTracking()
+        var productRows = await _dbContext.Products.AsNoTracking()
             .OrderBy(item => item.Name)
             .Select(item => new ForecastLookupDto
             {
                 Id = item.Id,
                 Name = item.Name
             })
-            .ToArrayAsync(cancellationToken);
+            .ToListAsync(cancellationToken);
+
+        var products = productRows
+            .GroupBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .OrderBy(item => item.Name)
+            .ToArray();
 
         return new ForecastOptionsDto
         {
@@ -178,11 +195,10 @@ public sealed class ForecastService : IForecastService
     {
         var productBase = await historicalSales
             .Join(_dbContext.Products.AsNoTracking(), sale => sale.ProductId, product => product.Id, (sale, product) => new { sale, product })
-            .GroupBy(item => new { item.product.Id, item.product.Name })
+            .GroupBy(item => item.product.Name)
             .Select(group => new
             {
-                group.Key.Id,
-                group.Key.Name,
+                Name = group.Key,
                 TotalSales = group.Sum(item => item.sale.SaleAmount),
                 TotalUnits = group.Sum(item => item.sale.Quantity),
                 ActiveDays = group.Select(item => item.sale.SaleDate.Date).Distinct().Count()
@@ -201,7 +217,7 @@ public sealed class ForecastService : IForecastService
                 result.Add(new ProductMonthlyForecastDto
                 {
                     MonthLabel = month.Label,
-                    ProductId = product.Id,
+                    ProductId = Guid.Empty,
                     ProductName = product.Name,
                     ProjectedSales = decimal.Round(avgDailySales * month.Days, 2, MidpointRounding.AwayFromZero),
                     ProjectedUnits = decimal.Round(avgDailyUnits * month.Days, 2, MidpointRounding.AwayFromZero),

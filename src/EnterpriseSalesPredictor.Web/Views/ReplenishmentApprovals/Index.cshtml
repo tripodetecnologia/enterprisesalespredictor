@@ -66,6 +66,9 @@
                 <tr>
                     <th>Fecha (año/mes)</th>
                     <th>Nombre producto</th>
+                    <th>Tipo de producto</th>
+                    <th>Referencia</th>
+                    <th>Marca</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
@@ -76,6 +79,9 @@
                 <tr>
                     <td>@item.RecommendedForMonth.ToString("yyyy-MM")</td>
                     <td>@item.ProductName</td>
+                    <td>@item.ProductType</td>
+                    <td>@item.ProductReference</td>
+                    <td>@item.ProductBrand</td>
                     <td><span class="status-pill status-pill-@item.Status.ToLowerInvariant()">@item.Status</span></td>
                     <td>
                         <div class="page-actions">
@@ -154,6 +160,16 @@
 
 @section Scripts {
     <script>
+        @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+        {
+            <text>window.appUi.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StatusMessage)), "success");</text>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <text>window.appUi.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ErrorMessage)), "error");</text>
+        }
+
         document.querySelectorAll('.approval-form').forEach(function (form) {
             form.addEventListener('submit', function (event) {
                 event.preventDefault();

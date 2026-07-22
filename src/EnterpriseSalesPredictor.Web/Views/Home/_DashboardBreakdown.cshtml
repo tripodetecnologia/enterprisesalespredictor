@@ -15,12 +15,12 @@ else
             <div class="dashboard-breakdown-item">
                 <div class="dashboard-breakdown-header">
                     <span>@item.Label</span>
-                    <strong>@item.TotalSalesAmount.ToString("N2")</strong>
+                    <strong>@item.TotalSalesAmount.ToString("N0")</strong>
                 </div>
                 <div class="dashboard-breakdown-bar-track">
                     <div class="dashboard-breakdown-bar-fill" style="width: @(width.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
                 </div>
-                <small>@item.TotalTransactions transacciones | @item.TotalQuantity.ToString("N2") unidades</small>
+                <small>@item.TotalTransactions transacciones | @item.TotalQuantity.ToString("N0") unidades</small>
             </div>
         }
     </div>

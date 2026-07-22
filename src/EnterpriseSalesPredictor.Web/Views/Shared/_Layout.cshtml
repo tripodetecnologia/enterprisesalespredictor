@@ -37,8 +37,7 @@
             <nav class="app-nav">
                 @if (User.Identity?.IsAuthenticated ?? false)
                 {
-                    <a class="@NavClass("Home")" asp-area="" asp-controller="Home" asp-action="Index">Panel</a>
-                    <a class="@NavClass("Home")" asp-area="" asp-controller="Home" asp-action="Privacy">Notas de la plataforma</a>
+                    <a class="@NavClass("Home")" asp-area="" asp-controller="Home" asp-action="Index">Panel</a>                    
                     @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "users:read" || claim.Value == "*")))
                     {
                         <a class="@NavClass("AccessManagement")" asp-area="" asp-controller="AccessManagement" asp-action="Index">Gestión de accesos</a>
@@ -137,6 +136,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/utils/dom.js" asp-append-version="true"></script>
     <script src="~/js/utils/http.js" asp-append-version="true"></script>
+    <script src="~/js/utils/number.js" asp-append-version="true"></script>
     <script src="~/js/modules/state-panels.js" asp-append-version="true"></script>
     <script src="~/js/modules/downloads.js" asp-append-version="true"></script>
     <script src="~/js/modules/chart-bars.js" asp-append-version="true"></script>

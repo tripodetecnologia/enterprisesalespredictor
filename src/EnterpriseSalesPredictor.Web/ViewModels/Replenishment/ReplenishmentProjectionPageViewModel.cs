@@ -8,9 +8,14 @@ public sealed class ReplenishmentProjectionPageViewModel
 
     public IReadOnlyCollection<Forecasting.ForecastOptionViewModel> Customers { get; set; } = Array.Empty<Forecasting.ForecastOptionViewModel>();
 
-    public IReadOnlyCollection<Forecasting.ForecastOptionViewModel> Products { get; set; } = Array.Empty<Forecasting.ForecastOptionViewModel>();
+    public IReadOnlyCollection<ReplenishmentProductOptionViewModel> Products { get; set; } = Array.Empty<ReplenishmentProductOptionViewModel>();
 
     public string? StatusMessage { get; set; }
 
     public string? ErrorMessage { get; set; }
+}
+
+public sealed class ReplenishmentProductOptionViewModel
+{
+    public string Name { get; set; } = string.Empty;
 }

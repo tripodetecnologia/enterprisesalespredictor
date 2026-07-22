@@ -25,7 +25,7 @@
         <p><strong>Estado:</strong> <span class="status-pill status-pill-@Model.Recommendation.Status.ToLowerInvariant()">@Model.Recommendation.Status</span></p>
         <p><strong>ID del producto:</strong> @Model.Recommendation.ProductId</p>
         <p><strong>Generado el:</strong> @Model.Recommendation.GeneratedAtUtc.ToString("u")</p>
-        <p><strong>Unidades recomendadas:</strong> @Model.Recommendation.RecommendedUnits.ToString("N2")</p>
+        <p><strong>Unidades recomendadas:</strong> @Model.Recommendation.RecommendedUnits.ToString("N0")</p>
         <p><strong>Confianza:</strong> @Model.Recommendation.Confidence.ToString("P0")</p>
         <p><strong>Justificación:</strong> @Model.Recommendation.Rationale</p>
         <p><strong>Revisado por:</strong> @(Model.Recommendation.ReviewedBy ?? "Pendiente")</p>

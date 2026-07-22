@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Text.Json;
 using EnterpriseSalesPredictor.Web.ViewModels.Replenishment;
 using EnterpriseSalesPredictor.Web.ViewModels.Forecasting;
 using Microsoft.AspNetCore.WebUtilities;
@@ -27,7 +28,7 @@ public sealed class ReplenishmentApiClient
             ["FromDate"] = filters.FromDate?.ToString("o"),
             ["ToDate"] = filters.ToDate?.ToString("o"),
             ["CustomerId"] = filters.CustomerId?.ToString(),
-            ["ProductId"] = filters.ProductId?.ToString(),
+            ["ProductName"] = filters.ProductName,
             ["PageNumber"] = pageNumber.ToString(),
             ["PageSize"] = "10"
         }.Where(item => !string.IsNullOrWhiteSpace(item.Value)).ToDictionary(item => item.Key, item => item.Value));
@@ -92,8 +93,69 @@ public sealed class ReplenishmentApiClient
         if (!response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new InvalidOperationException($"Recommendation review failed: {content}");
+            throw new InvalidOperationException(ParseApiError(content, "No fue posible procesar la sugerencia."));
         }
+    }
+
+    private static string ParseApiError(string content, string fallbackMessage)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return fallbackMessage;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(content);
+            var root = document.RootElement;
+
+            if (root.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var property in errors.EnumerateObject())
+                {
+                    if (property.Value.ValueKind == JsonValueKind.Array && property.Value.GetArrayLength() > 0)
+                    {
+                        var message = property.Value[0].GetString();
+                        if (!string.IsNullOrWhiteSpace(message))
+                        {
+                            return message;
+                        }
+                    }
+                }
+            }
+
+            if (root.TryGetProperty("message", out var messageProperty))
+            {
+                var message = messageProperty.GetString();
+                if (!string.IsNullOrWhiteSpace(message))
+                {
+                    return message;
+                }
+            }
+
+            if (root.TryGetProperty("detail", out var detailProperty))
+            {
+                var detail = detailProperty.GetString();
+                if (!string.IsNullOrWhiteSpace(detail))
+                {
+                    return detail;
+                }
+            }
+
+            if (root.TryGetProperty("title", out var titleProperty))
+            {
+                var title = titleProperty.GetString();
+                if (!string.IsNullOrWhiteSpace(title))
+                {
+                    return title;
+                }
+            }
+        }
+        catch (JsonException)
+        {
+        }
+
+        return fallbackMessage;
     }
 
     private void AttachBearerToken()

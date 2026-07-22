@@ -24,7 +24,7 @@ public sealed class ForecastsApiClient
         {
             request.FromDate,
             request.ToDate,
-            request.ProductId,
+            request.ProductName,
             request.CustomerId
         }, cancellationToken);
 
@@ -60,6 +60,9 @@ public sealed class ForecastsApiClient
                 .ToArray(),
             Products = payload.Products
                 .Select(item => new ForecastOptionViewModel { Id = item.Id, Name = item.Name })
+                .GroupBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
+                .OrderBy(item => item.Name)
                 .ToArray()
         };
     }

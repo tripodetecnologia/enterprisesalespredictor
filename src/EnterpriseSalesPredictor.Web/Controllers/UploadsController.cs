@@ -93,7 +93,7 @@ public sealed class UploadsController : Controller
 
         if (file is null)
         {
-            errorMessage = "Seleccioná un archivo para cargar.";
+            errorMessage = "Selecciona un archivo para cargar.";
             return false;
         }
 

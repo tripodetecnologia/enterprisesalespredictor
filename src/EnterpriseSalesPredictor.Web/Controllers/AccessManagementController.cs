@@ -35,7 +35,7 @@ public sealed class AccessManagementController : Controller
         {
             var invalidModel = await BuildPageModelAsync(cancellationToken);
             invalidModel.CreateUserForm = model;
-            invalidModel.ErrorMessage = "Corregí los campos del formulario de usuario.";
+            invalidModel.ErrorMessage = "Debe corregir los campos del formulario de usuario.";
             return View("Index", invalidModel);
         }
 

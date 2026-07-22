@@ -20,6 +20,11 @@ public sealed class ReplenishmentController : Controller
     [RequirePermission("replenishment:read")]
     public async Task<IActionResult> Index([FromQuery] ReplenishmentProjectionFilterViewModel filters, int pageNumber = 1, CancellationToken cancellationToken = default)
     {
+        if (filters.FromDate.HasValue && filters.ToDate.HasValue && string.IsNullOrWhiteSpace(filters.ProductName))
+        {
+            ModelState.AddModelError(nameof(filters.ProductName), "El producto es obligatorio.");
+        }
+
         var viewModel = await BuildPageModelAsync(filters, pageNumber, cancellationToken);
         return View(viewModel);
     }
@@ -38,7 +43,7 @@ public sealed class ReplenishmentController : Controller
                 fromDate = filters.FromDate?.ToString("yyyy-MM-dd"),
                 toDate = filters.ToDate?.ToString("yyyy-MM-dd"),
                 customerId = filters.CustomerId,
-                productId = filters.ProductId,
+                productName = filters.ProductName,
                 pageNumber
             });
         }
@@ -62,7 +67,11 @@ public sealed class ReplenishmentController : Controller
             Filters = filters,
             Results = results,
             Customers = options.Customers,
-            Products = options.Products,
+            Products = options.Products
+                .GroupBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
+                .Select(group => new ReplenishmentProductOptionViewModel { Name = group.Key })
+                .OrderBy(item => item.Name)
+                .ToArray(),
             StatusMessage = TempData["StatusMessage"] as string
         };
     }

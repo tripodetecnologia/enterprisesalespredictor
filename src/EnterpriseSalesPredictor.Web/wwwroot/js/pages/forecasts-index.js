@@ -1,43 +1,43 @@
 (function (namespace) {
     namespace.Pages.ForecastsIndex = {
         init: function () {
-            var form = document.getElementById("forecast-form");
-            var loading = document.getElementById("forecast-loading");
-            var error = document.getElementById("forecast-error");
-            var result = document.getElementById("forecast-result");
-            var customerSection = document.getElementById("forecast-customer-section");
-            var productSection = document.getElementById("forecast-product-section");
+            let form = document.getElementById("forecast-form");
+            let loading = document.getElementById("forecast-loading");
+            let error = document.getElementById("forecast-error");
+            let result = document.getElementById("forecast-result");
+            let customerSection = document.getElementById("forecast-customer-section");
+            let productSection = document.getElementById("forecast-product-section");
 
             if (!form || !loading || !error || !result || !customerSection || !productSection) {
                 return;
             }
 
-            var projectedSales = document.getElementById("forecast-projected-sales");
-            var confidence = document.getElementById("forecast-confidence");
-            var generatedAt = document.getElementById("forecast-generated-at");
-            var generatedBy = document.getElementById("forecast-generated-by");
-            var summary = document.getElementById("forecast-summary");
+            let projectedSales = document.getElementById("forecast-projected-sales");
+            let confidence = document.getElementById("forecast-confidence");
+            let generatedAt = document.getElementById("forecast-generated-at");
+            let generatedBy = document.getElementById("forecast-generated-by");
+            let summary = document.getElementById("forecast-summary");
 
-            var customerBody = document.getElementById("forecast-customer-body");
-            var customerPrev = document.getElementById("forecast-customer-prev");
-            var customerNext = document.getElementById("forecast-customer-next");
-            var customerIndicator = document.getElementById("forecast-customer-indicator");
-            var customerPages = document.getElementById("forecast-customer-pages");
-            var customerSummary = document.getElementById("forecast-customer-summary");
+            let customerBody = document.getElementById("forecast-customer-body");
+            let customerPrev = document.getElementById("forecast-customer-prev");
+            let customerNext = document.getElementById("forecast-customer-next");
+            let customerIndicator = document.getElementById("forecast-customer-indicator");
+            let customerPages = document.getElementById("forecast-customer-pages");
+            let customerSummary = document.getElementById("forecast-customer-summary");
 
-            var productBody = document.getElementById("forecast-product-body");
-            var productPrev = document.getElementById("forecast-product-prev");
-            var productNext = document.getElementById("forecast-product-next");
-            var productIndicator = document.getElementById("forecast-product-indicator");
-            var productPages = document.getElementById("forecast-product-pages");
-            var productSummary = document.getElementById("forecast-product-summary");
+            let productBody = document.getElementById("forecast-product-body");
+            let productPrev = document.getElementById("forecast-product-prev");
+            let productNext = document.getElementById("forecast-product-next");
+            let productIndicator = document.getElementById("forecast-product-indicator");
+            let productPages = document.getElementById("forecast-product-pages");
+            let productSummary = document.getElementById("forecast-product-summary");
 
-            var customerState = { items: [], page: 1, pageSize: 10 };
-            var productState = { items: [], page: 1, pageSize: 10 };
+            let customerState = { items: [], page: 1, pageSize: 10 };
+            let productState = { items: [], page: 1, pageSize: 10 };
 
             form.addEventListener("submit", async function (event) {
                 event.preventDefault();
-                var request = buildPayload(form);
+                let request = buildPayload(form);
 
                 if (!request.fromDate) {
                     namespace.Modules.statePanels.showAlert(error, "error", "Dato requerido", "La fecha de inicio es obligatoria.");
@@ -51,12 +51,18 @@
                     return;
                 }
 
+                if (!request.productName) {
+                    namespace.Modules.statePanels.showAlert(error, "error", "Dato requerido", "El producto es obligatorio.");
+                    hideResults();
+                    return;
+                }
+
                 loading.hidden = false;
                 namespace.Modules.statePanels.clear(error);
                 hideResults();
 
                 try {
-                    var payload = await namespace.Utils.http.fetchJson("/Forecasts/Generate", {
+                    let payload = await namespace.Utils.http.fetchJson("/Forecasts/Generate", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -120,7 +126,7 @@
             }
 
             function renderSummary(payload) {
-                projectedSales.textContent = Number(payload.projectedSales || 0).toFixed(2);
+                projectedSales.textContent = namespace.Utils.number.formatInteger(payload.projectedSales);
                 confidence.textContent = Math.round(Number(payload.confidence || 0) * 100) + "%";
                 generatedAt.textContent = namespace.Utils.dom.formatDateTime(payload.generatedAtUtc);
                 generatedBy.textContent = payload.generatedBy || "-";
@@ -128,21 +134,21 @@
             }
 
             function renderCustomerTable() {
-                var items = slice(customerState);
+                let items = slice(customerState);                
                 namespace.Modules.tableRenderer.renderRows(customerBody, items, renderCustomerRow, 4);
                 customerSummary.textContent = buildSummary(customerState);
                 renderPager(customerState, customerIndicator, customerPages, customerPrev, customerNext, renderCustomerTable);
             }
 
             function renderProductTable() {
-                var items = slice(productState);
+                let items = slice(productState);
                 namespace.Modules.tableRenderer.renderRows(productBody, items, renderProductRow, 5);
                 productSummary.textContent = buildSummary(productState);
                 renderPager(productState, productIndicator, productPages, productPrev, productNext, renderProductTable);
             }
 
             function renderPager(state, indicator, pagesContainer, prevButton, nextButton, rerender) {
-                var pages = totalPages(state);
+                let pages = totalPages(state);
                 indicator.textContent = "Página " + state.page + " de " + Math.max(pages, 1);
                 prevButton.disabled = state.page <= 1;
                 nextButton.disabled = state.page >= pages;
@@ -152,11 +158,11 @@
                     return;
                 }
 
-                var start = Math.max(1, state.page - 2);
-                var end = Math.min(pages, state.page + 2);
+                let start = Math.max(1, state.page - 2);
+                let end = Math.min(pages, state.page + 2);
 
-                for (var page = start; page <= end; page++) {
-                    var button = document.createElement("button");
+                for (let page = start; page <= end; page++) {
+                    let button = document.createElement("button");
                     button.type = "button";
                     button.className = page === state.page ? "sales-page-link sales-page-link-active" : "sales-page-link";
                     button.textContent = String(page);
@@ -176,13 +182,13 @@
                     return "Mostrando 0 registros.";
                 }
 
-                var start = ((state.page - 1) * state.pageSize) + 1;
-                var end = Math.min(start + state.pageSize - 1, state.items.length);
+                let start = ((state.page - 1) * state.pageSize) + 1;
+                let end = Math.min(start + state.pageSize - 1, state.items.length);
                 return "Mostrando " + start + " a " + end + " de " + state.items.length + " registros totales.";
             }
 
             function slice(state) {
-                var start = (state.page - 1) * state.pageSize;
+                let start = (state.page - 1) * state.pageSize;
                 return state.items.slice(start, start + state.pageSize);
             }
 
@@ -193,25 +199,25 @@
             function renderCustomerRow(row) {
                 return "<td>" + namespace.Utils.dom.escapeHtml(row.monthLabel) + "</td>"
                     + "<td>" + namespace.Utils.dom.escapeHtml(row.customerName) + "</td>"
-                    + "<td>" + Number(row.projectedSales || 0).toFixed(2) + "</td>"
+                    + "<td>" + namespace.Utils.number.formatInteger(row.projectedSales) + "</td>"
                     + "<td>" + Math.round(Number(row.confidence || 0) * 100) + "%</td>";
             }
 
             function renderProductRow(row) {
                 return "<td>" + namespace.Utils.dom.escapeHtml(row.monthLabel) + "</td>"
                     + "<td>" + namespace.Utils.dom.escapeHtml(row.productName) + "</td>"
-                    + "<td>" + Number(row.projectedUnits || 0).toFixed(2) + "</td>"
-                    + "<td>" + Number(row.projectedSales || 0).toFixed(2) + "</td>"
+                    + "<td>" + namespace.Utils.number.formatInteger(row.projectedUnits) + "</td>"
+                    + "<td>" + namespace.Utils.number.formatInteger(row.projectedSales) + "</td>"
                     + "<td>" + Math.round(Number(row.confidence || 0) * 100) + "%</td>";
             }
 
             function buildPayload(sourceForm) {
-                var formData = new FormData(sourceForm);
+                let formData = new FormData(sourceForm);
                 return {
                     fromDate: formData.get("Filters.FromDate") || null,
                     toDate: formData.get("Filters.ToDate") || null,
                     customerId: formData.get("Filters.CustomerId") || null,
-                    productId: formData.get("Filters.ProductId") || null
+                    productName: formData.get("Filters.ProductName") || null
                 };
             }
         }

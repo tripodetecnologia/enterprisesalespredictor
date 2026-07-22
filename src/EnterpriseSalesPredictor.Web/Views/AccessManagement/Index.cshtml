@@ -50,25 +50,32 @@
 
             <div class="form-group">
                 <label>Usuario</label>
-                <input asp-for="CreateUserForm.Username" />
+                <input asp-for="CreateUserForm.Username" name="Username" />
                 <span asp-validation-for="CreateUserForm.Username" class="field-error"></span>
             </div>
 
             <div class="form-group">
                 <label>Clave</label>
-                <input asp-for="CreateUserForm.Password" />
+                <input asp-for="CreateUserForm.Password" name="Password" type="password" autocomplete="new-password" />
                 <span asp-validation-for="CreateUserForm.Password" class="field-error"></span>
             </div>
 
             <div class="form-group">
                 <label>Rol</label>
-                <input asp-for="CreateUserForm.Role" />
+                <input asp-for="CreateUserForm.Role" name="Role" list="existing-roles" />
                 <span asp-validation-for="CreateUserForm.Role" class="field-error"></span>
             </div>
 
+            <datalist id="existing-roles">
+                @foreach (var role in Model.Roles.Select(item => item.Role).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(item => item))
+                {
+                    <option value="@role"></option>
+                }
+            </datalist>
+
             <div class="form-group">
                 <label>Permisos (separados por coma)</label>
-                <input asp-for="CreateUserForm.PermissionsRaw" />
+                <input asp-for="CreateUserForm.PermissionsRaw" name="PermissionsRaw" />
             </div>
 
             <button type="submit">Crear usuario</button>
@@ -102,14 +109,27 @@
         @Html.AntiForgeryToken()
 
         <div class="form-group">
-            <label asp-for="UpdateRoleForm.Role"></label>
-            <input asp-for="UpdateRoleForm.Role" />
+            <label asp-for="UpdateRoleForm.Role">Rol</label>
+            <select asp-for="UpdateRoleForm.Role" name="Role">
+                <option value="">Seleccione...</option>
+                @foreach (var role in Model.Roles.Select(item => item.Role).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(item => item))
+                {
+                    if (Model.UpdateRoleForm.Role == role)
+                    {
+                        <option value="@role" selected>@role</option>
+                    }
+                    else
+                    {
+                        <option value="@role">@role</option>
+                    }
+                }
+            </select>
             <span asp-validation-for="UpdateRoleForm.Role" class="field-error"></span>
         </div>
 
         <div class="form-group">
             <label>Permisos (separados por coma)</label>
-            <input asp-for="UpdateRoleForm.PermissionsRaw" />
+            <input asp-for="UpdateRoleForm.PermissionsRaw" name="PermissionsRaw" />
         </div>
 
         <button type="submit">Actualizar rol</button>

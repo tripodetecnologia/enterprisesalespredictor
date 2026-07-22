@@ -179,6 +179,6 @@ public sealed class ReportReadService : IReportReadService
 
     private static ReportMetricDto Metric(string label, decimal value)
     {
-        return Metric(label, value.ToString("N2"));
+        return Metric(label, value.ToString("N0"));
     }
 }

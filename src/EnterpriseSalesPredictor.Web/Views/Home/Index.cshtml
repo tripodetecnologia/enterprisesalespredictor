@@ -12,11 +12,11 @@
 <section class="dashboard-kpi-grid">
     <article class="hero dashboard-kpi-card">
         <span class="dashboard-kpi-label">Ventas totales</span>
-        <strong class="dashboard-kpi-value">@Model.Kpis.TotalSalesAmount.ToString("N2")</strong>
+        <strong class="dashboard-kpi-value">@Model.Kpis.TotalSalesAmount.ToString("N0")</strong>
     </article>
     <article class="hero dashboard-kpi-card">
         <span class="dashboard-kpi-label">Unidades vendidas</span>
-        <strong class="dashboard-kpi-value">@Model.Kpis.TotalQuantity.ToString("N2")</strong>
+        <strong class="dashboard-kpi-value">@Model.Kpis.TotalQuantity.ToString("N0")</strong>
     </article>
     <article class="hero dashboard-kpi-card">
         <span class="dashboard-kpi-label">Transacciones</span>
@@ -24,7 +24,7 @@
     </article>
     <article class="hero dashboard-kpi-card">
         <span class="dashboard-kpi-label">Ticket promedio</span>
-        <strong class="dashboard-kpi-value">@Model.Kpis.AverageTicket.ToString("N2")</strong>
+        <strong class="dashboard-kpi-value">@Model.Kpis.AverageTicket.ToString("N0")</strong>
     </article>
 </section>
 

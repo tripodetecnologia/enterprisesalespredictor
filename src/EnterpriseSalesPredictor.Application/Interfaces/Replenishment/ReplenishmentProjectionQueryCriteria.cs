@@ -10,7 +10,7 @@ public sealed class ReplenishmentProjectionQueryCriteria
 
     public Guid? CustomerId { get; set; }
 
-    public Guid? ProductId { get; set; }
+    public string? ProductName { get; set; }
 
     public int PageNumber { get; set; } = 1;
 

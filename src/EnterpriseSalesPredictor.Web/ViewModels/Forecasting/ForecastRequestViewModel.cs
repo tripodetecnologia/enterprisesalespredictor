@@ -10,7 +10,8 @@ public sealed class ForecastRequestViewModel
     [Required(ErrorMessage = "La fecha de fin es obligatoria.")]
     public DateTime? ToDate { get; set; }
 
-    public Guid? ProductId { get; set; }
+    [Required(ErrorMessage = "El producto es obligatorio.")]
+    public string? ProductName { get; set; }
 
     public Guid? CustomerId { get; set; }
 }
