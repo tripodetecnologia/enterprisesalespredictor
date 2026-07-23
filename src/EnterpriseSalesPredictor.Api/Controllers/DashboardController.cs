@@ -7,7 +7,7 @@ namespace EnterpriseSalesPredictor.Api.Controllers;
 [ApiController]
 [Route("api/dashboard")]
 [Authorize]
-[Authorize(Policy = "Permission:dashboard:read")]
+[Authorize(Policy = PermissionPolicies.DashboardRead)]
 public sealed class DashboardController : ControllerBase
 {
     private readonly IDashboardReadService _dashboardReadService;

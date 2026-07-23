@@ -4,14 +4,14 @@
             var numericValue = Number(value || 0);
             var settings = options || {};
 
-            return numericValue.toLocaleString(settings.locale || "es-CO", {
+            return numericValue.toLocaleString(settings.locale || namespace.Constants.locale, {
                 minimumFractionDigits: settings.minimumFractionDigits ?? 0,
                 maximumFractionDigits: settings.maximumFractionDigits ?? 0
             });
         },
         formatInteger: function (value, locale) {
             return this.formatNumber(value, {
-                locale: locale || "es-CO",
+                locale: locale || namespace.Constants.locale,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             });

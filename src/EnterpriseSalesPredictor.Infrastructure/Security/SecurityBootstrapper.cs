@@ -1,4 +1,5 @@
 using EnterpriseSalesPredictor.Domain.Entities;
+using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +40,7 @@ public sealed class SecurityBootstrapper : ISecurityBootstrapper
 
             await _dbContext.UserRoles.AddAsync(new UserRole(Guid.NewGuid(), user.Id, role.Id), cancellationToken);
 
-            var permissions = seedUser.Permissions.Contains("*", StringComparer.OrdinalIgnoreCase)
+            var permissions = seedUser.Permissions.Contains(PermissionValues.All, StringComparer.OrdinalIgnoreCase)
                 ? PermissionCatalog.All
                 : seedUser.Permissions.ToArray();
 

@@ -21,17 +21,6 @@
             <span asp-validation-for="Filters.ToDate" class="field-error"></span>
         </div>
 
-        <div class="form-group" style="margin-bottom:5px;">
-            <label asp-for="Filters.CustomerId">Cliente</label>
-            <select asp-for="Filters.CustomerId">
-                <option value="">Todos los clientes</option>
-                @foreach (var customer in Model.Customers)
-                {
-                    <option value="@customer.Id">@customer.Name</option>
-                }
-            </select>
-        </div>
-
         <div class="form-group">
             <label asp-for="Filters.ProductName">Producto</label>
             <select asp-for="Filters.ProductName">
@@ -42,6 +31,18 @@
                 }
             </select>
             <span asp-validation-for="Filters.ProductName" class="field-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Filters.CustomerId">Cliente</label>
+            <select asp-for="Filters.CustomerId">
+                <option value="">Todos los clientes</option>
+                @foreach (var customer in Model.Customers)
+                {
+                    <option value="@customer.Id">@customer.Name</option>
+                }
+            </select>
+            <span class="mb-1"> </span>
         </div>
 
         <button type="submit">Generar proyección</button>

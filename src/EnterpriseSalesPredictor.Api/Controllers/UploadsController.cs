@@ -11,11 +11,6 @@ namespace EnterpriseSalesPredictor.Api.Controllers;
 [Authorize]
 public sealed class UploadsController : ControllerBase
 {
-    private const long MaxFileSizeBytes = 20 * 1024 * 1024;
-
-    private static readonly string[] ExcelExtensions = { ".xlsx", ".xls" };
-    private static readonly string[] DelimitedExtensions = { ".csv", ".txt" };
-
     private readonly IEnumerable<IUploadFileParser> _parsers;
     private readonly IUploadProcessingService _uploadProcessingService;
     private readonly IUploadService _uploadService;
@@ -34,25 +29,25 @@ public sealed class UploadsController : ControllerBase
     }
 
     [HttpPost("excel")]
-    [Authorize(Policy = "Permission:uploads:write")]
+    [Authorize(Policy = PermissionPolicies.UploadsWrite)]
     public async Task<ActionResult<UploadProcessResponse>> UploadExcelAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        ValidateFile(file, ExcelExtensions);
+        ValidateFile(file, UploadPolicy.ExcelExtensions);
         var response = await ProcessAsync(file, cancellationToken);
         return Ok(response);
     }
 
     [HttpPost("delimited")]
-    [Authorize(Policy = "Permission:uploads:write")]
+    [Authorize(Policy = PermissionPolicies.UploadsWrite)]
     public async Task<ActionResult<UploadProcessResponse>> UploadDelimitedAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        ValidateFile(file, DelimitedExtensions);
+        ValidateFile(file, UploadPolicy.DelimitedExtensions);
         var response = await ProcessAsync(file, cancellationToken);
         return Ok(response);
     }
 
     [HttpGet]
-    [Authorize(Policy = "Permission:uploads:read")]
+    [Authorize(Policy = PermissionPolicies.UploadsRead)]
     public async Task<IActionResult> GetUploadsAsync(CancellationToken cancellationToken)
     {
         var uploads = await _uploadService.GetUploadsAsync(cancellationToken);
@@ -69,7 +64,7 @@ public sealed class UploadsController : ControllerBase
     }
 
     [HttpGet("{uploadId:guid}/errors")]
-    [Authorize(Policy = "Permission:uploads:read")]
+    [Authorize(Policy = PermissionPolicies.UploadsRead)]
     public async Task<IActionResult> GetUploadErrorsAsync(Guid uploadId, CancellationToken cancellationToken)
     {
         var errors = await _uploadService.GetUploadErrorsAsync(uploadId, cancellationToken);
@@ -125,9 +120,9 @@ public sealed class UploadsController : ControllerBase
             throw new InvalidOperationException("The file is empty.");
         }
 
-        if (file.Length > MaxFileSizeBytes)
+        if (file.Length > UploadPolicy.MaxFileSizeBytes)
         {
-            throw new InvalidOperationException($"The file exceeds the maximum allowed size ({MaxFileSizeBytes} bytes).");
+            throw new InvalidOperationException($"The file exceeds the maximum allowed size ({UploadPolicy.MaxFileSizeBytes} bytes).");
         }
 
         var extension = Path.GetExtension(file.FileName);

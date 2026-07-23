@@ -1,3 +1,4 @@
+using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Application.DTOs.Forecasting;
 using EnterpriseSalesPredictor.Application.Interfaces.Auditing;
 using EnterpriseSalesPredictor.Application.Interfaces.Forecasting;
@@ -47,7 +48,7 @@ public sealed class ForecastService : IForecastService
         }
 
         var horizonDays = (query.ToDate.Date - query.FromDate.Date).Days + 1;
-        var lookbackDays = Math.Max(horizonDays * 3, 90);
+        var lookbackDays = Math.Max(horizonDays * ForecastPolicy.LookbackHorizonMultiplier, ForecastPolicy.MinimumLookbackDays);
         var lookbackStart = query.FromDate.Date.AddDays(-lookbackDays);
         var historicalSales = _dbContext.Sales.AsNoTracking()
             .Where(sale => sale.SaleDate.Date >= lookbackStart && sale.SaleDate.Date < query.FromDate.Date);
@@ -76,7 +77,7 @@ public sealed class ForecastService : IForecastService
             .ToArray();
 
         var confidence = allConfidences.Length == 0
-            ? 0.35m
+            ? ForecastPolicy.NoHistoryConfidence
             : decimal.Round(allConfidences.Average(), 2, MidpointRounding.AwayFromZero);
 
         var forecast = new Forecast(
@@ -98,7 +99,7 @@ public sealed class ForecastService : IForecastService
             Actor = query.RequestedBy,
             Action = "ForecastGenerated",
             Module = "Forecasting",
-            Details = $"ForecastId={forecast.Id}; FromDate={forecast.FromDate:yyyy-MM-dd}; ToDate={forecast.ToDate:yyyy-MM-dd}; Confidence={confidence}; ProjectedSales={projectedSales}; CustomerCards={customerForecasts.Count}; ProductCards={productForecasts.Count}"
+            Details = $"ForecastId={forecast.Id}; FromDate={forecast.FromDate.ToString(DateFormats.HtmlDate)}; ToDate={forecast.ToDate.ToString(DateFormats.HtmlDate)}; Confidence={confidence}; ProjectedSales={projectedSales}; CustomerCards={customerForecasts.Count}; ProductCards={productForecasts.Count}"
         }, cancellationToken);
 
         return new ForecastDto
@@ -165,7 +166,7 @@ public sealed class ForecastService : IForecastService
                 ActiveDays = group.Select(item => item.sale.SaleDate.Date).Distinct().Count()
             })
             .OrderByDescending(item => item.TotalSales)
-            .Take(6)
+            .Take(ForecastPolicy.TopForecastItems)
             .ToListAsync(cancellationToken);
 
         var result = new List<CustomerMonthlyForecastDto>();
@@ -204,7 +205,7 @@ public sealed class ForecastService : IForecastService
                 ActiveDays = group.Select(item => item.sale.SaleDate.Date).Distinct().Count()
             })
             .OrderByDescending(item => item.TotalSales)
-            .Take(6)
+            .Take(ForecastPolicy.TopForecastItems)
             .ToListAsync(cancellationToken);
 
         var result = new List<ProductMonthlyForecastDto>();
@@ -244,7 +245,7 @@ public sealed class ForecastService : IForecastService
 
             if (days > 0)
             {
-                slices.Add(($"{cursor:yyyy-MM}", days));
+                slices.Add((cursor.ToString(DateFormats.MonthKey), days));
             }
 
             cursor = cursor.AddMonths(1);
@@ -257,11 +258,11 @@ public sealed class ForecastService : IForecastService
     {
         return activeDays switch
         {
-            >= 60 => 0.90m,
-            >= 30 => 0.80m,
-            >= 14 => 0.70m,
-            > 0 => 0.55m,
-            _ => 0.35m
+            >= ForecastPolicy.HighConfidenceActiveDays => ForecastPolicy.HighConfidence,
+            >= ForecastPolicy.MediumHighConfidenceActiveDays => ForecastPolicy.MediumHighConfidence,
+            >= ForecastPolicy.MediumConfidenceActiveDays => ForecastPolicy.MediumConfidence,
+            > 0 => ForecastPolicy.LowConfidence,
+            _ => ForecastPolicy.NoHistoryConfidence
         };
     }
 }

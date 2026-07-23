@@ -20,7 +20,7 @@ public class HomeController : Controller
         _dashboardApiClient = dashboardApiClient;
     }
 
-    [RequirePermission("dashboard:read")]
+    [RequirePermission(Permissions.DashboardRead)]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var viewModel = new DashboardPageViewModel

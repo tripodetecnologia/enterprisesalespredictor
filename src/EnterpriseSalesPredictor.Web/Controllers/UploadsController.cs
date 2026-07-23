@@ -9,10 +9,6 @@ namespace EnterpriseSalesPredictor.Web.Controllers;
 [Authorize]
 public sealed class UploadsController : Controller
 {
-    private const long MaxUploadSizeBytes = 20 * 1024 * 1024;
-    private static readonly string[] ExcelExtensions = { ".xlsx", ".xls" };
-    private static readonly string[] DelimitedExtensions = { ".csv", ".txt" };
-
     private readonly UploadsApiClient _uploadsApiClient;
 
     public UploadsController(UploadsApiClient uploadsApiClient)
@@ -21,7 +17,7 @@ public sealed class UploadsController : Controller
     }
 
     [HttpGet]
-    [RequirePermission("uploads:read")]
+    [RequirePermission(Permissions.UploadsRead)]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var viewModel = await BuildPageModelAsync(cancellationToken);
@@ -30,7 +26,7 @@ public sealed class UploadsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [RequirePermission("uploads:write")]
+    [RequirePermission(Permissions.UploadsWrite)]
     public async Task<IActionResult> Upload(IFormFile? file, CancellationToken cancellationToken)
     {
         if (!TryValidateFile(file, out var fileType, out var errorMessage))
@@ -45,7 +41,7 @@ public sealed class UploadsController : Controller
             await using var stream = file!.OpenReadStream();
             UploadProcessingResponseViewModel result;
 
-            if (fileType == "excel")
+            if (fileType == UploadPolicy.ExcelParserKey)
             {
                 result = await _uploadsApiClient.UploadExcelAsync(stream, file.FileName, cancellationToken);
             }
@@ -68,7 +64,7 @@ public sealed class UploadsController : Controller
     }
 
     [HttpGet]
-    [RequirePermission("uploads:read")]
+    [RequirePermission(Permissions.UploadsRead)]
     public async Task<IActionResult> Errors(Guid id, CancellationToken cancellationToken)
     {
         var errors = await _uploadsApiClient.GetUploadErrorsAsync(id, cancellationToken);
@@ -103,26 +99,26 @@ public sealed class UploadsController : Controller
             return false;
         }
 
-        if (file.Length > MaxUploadSizeBytes)
+        if (file.Length > UploadPolicy.MaxFileSizeBytes)
         {
-            errorMessage = "El archivo supera el tamaño máximo permitido de 20 MB.";
+            errorMessage = $"El archivo supera el tamaño máximo permitido de {UploadPolicy.MaxFileSizeMegabytes} MB.";
             return false;
         }
 
         var extension = Path.GetExtension(file.FileName);
-        if (ExcelExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+        if (UploadPolicy.ExcelExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
         {
-            fileType = "excel";
+            fileType = UploadPolicy.ExcelParserKey;
             return true;
         }
 
-        if (DelimitedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+        if (UploadPolicy.DelimitedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
         {
-            fileType = "delimited";
+            fileType = UploadPolicy.DelimitedParserKey;
             return true;
         }
 
-        errorMessage = "Extensión de archivo no soportada. Permitidas: .xlsx, .xls, .csv, .txt.";
+        errorMessage = $"Extensión de archivo no soportada. Permitidas: {UploadPolicy.AllowedExtensionsText}.";
         return false;
     }
 }

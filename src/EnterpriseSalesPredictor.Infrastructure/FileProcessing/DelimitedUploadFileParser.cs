@@ -1,3 +1,4 @@
+using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Application.Interfaces.Uploads;
 
 namespace EnterpriseSalesPredictor.Infrastructure.FileProcessing;
@@ -6,12 +7,11 @@ public sealed class DelimitedUploadFileParser : IUploadFileParser
 {
     private const char Separator = ';';
 
-    public string ParserKey => "delimited";
+    public string ParserKey => UploadPolicy.DelimitedParserKey;
 
     public bool CanHandle(string fileName)
     {
-        return fileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase) ||
-               fileName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase);
+        return UploadPolicy.DelimitedExtensions.Any(extension => fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task<UploadParseResult> ParseAsync(Stream stream, CancellationToken cancellationToken = default)

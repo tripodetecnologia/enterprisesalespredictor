@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EnterpriseSalesPredictor.Web.Controllers;
 
 [Authorize]
-[RequirePermission("audit:read")]
+[RequirePermission(Permissions.AuditRead)]
 public sealed class AuditController : Controller
 {
     private readonly AuditApiClient _auditApiClient;

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EnterpriseSalesPredictor.Web.Controllers;
 
 [Authorize]
-[RequirePermission("exports:write")]
+[RequirePermission(Permissions.ExportsWrite)]
 public sealed class ExportsController : Controller
 {
     private readonly ExportsApiClient _exportsApiClient;

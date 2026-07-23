@@ -20,7 +20,7 @@ public sealed class AccessManagementController : ControllerBase
     }
 
     [HttpGet("users")]
-    [Authorize(Policy = "Permission:users:read")]
+    [Authorize(Policy = PermissionPolicies.UsersRead)]
     public async Task<IActionResult> GetUsersAsync(CancellationToken cancellationToken)
     {
         var users = await _accessManagementService.GetUsersAsync(cancellationToken);
@@ -28,7 +28,7 @@ public sealed class AccessManagementController : ControllerBase
     }
 
     [HttpPost("users")]
-    [Authorize(Policy = "Permission:users:write")]
+    [Authorize(Policy = PermissionPolicies.UsersWrite)]
     public async Task<IActionResult> CreateUserAsync([FromBody] CreateUserRequest request, CancellationToken cancellationToken)
     {
         var user = await _accessManagementService.CreateUserAsync(new CreateAccessUserRequestDto
@@ -43,7 +43,7 @@ public sealed class AccessManagementController : ControllerBase
     }
 
     [HttpGet("roles")]
-    [Authorize(Policy = "Permission:roles:read")]
+    [Authorize(Policy = PermissionPolicies.RolesRead)]
     public async Task<IActionResult> GetRolesAsync(CancellationToken cancellationToken)
     {
         var roles = await _accessManagementService.GetRolesAsync(cancellationToken);
@@ -51,7 +51,7 @@ public sealed class AccessManagementController : ControllerBase
     }
 
     [HttpPut("roles/permissions")]
-    [Authorize(Policy = "Permission:roles:write")]
+    [Authorize(Policy = PermissionPolicies.RolesWrite)]
     public async Task<IActionResult> UpdateRolePermissionsAsync([FromBody] UpdateRolePermissionsRequest request, CancellationToken cancellationToken)
     {
         var role = await _accessManagementService.UpdateRolePermissionsAsync(new UpdateRolePermissionsRequestDto
@@ -64,7 +64,7 @@ public sealed class AccessManagementController : ControllerBase
     }
 
     [HttpGet("permissions")]
-    [Authorize(Policy = "Permission:roles:read")]
+    [Authorize(Policy = PermissionPolicies.RolesRead)]
     public async Task<IActionResult> GetPermissionCatalogAsync(CancellationToken cancellationToken)
     {
         var permissions = await _accessManagementService.GetPermissionCatalogAsync(cancellationToken);

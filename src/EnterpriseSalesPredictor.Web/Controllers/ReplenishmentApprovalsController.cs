@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EnterpriseSalesPredictor.Web.Controllers;
 
 [Authorize]
-[RequirePermission("replenishment:read")]
+[RequirePermission(Permissions.ReplenishmentRead)]
 public sealed class ReplenishmentApprovalsController : Controller
 {
     private readonly ReplenishmentApiClient _replenishmentApiClient;
@@ -26,19 +26,19 @@ public sealed class ReplenishmentApprovalsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [RequirePermission("replenishment:write")]
+    [RequirePermission(Permissions.ReplenishmentWrite)]
     public async Task<IActionResult> Review(ReviewRecommendationFormViewModel model, DateTime? fromDate, DateTime? toDate, Guid? productId, int pageNumber = 1, CancellationToken cancellationToken = default)
     {
         try
         {
             await _replenishmentApiClient.ReviewRecommendationAsync(model.RecommendationId, model.Action, model.Notes, cancellationToken);
             TempData["StatusMessage"] = "La sugerencia se actualizó correctamente.";
-            return RedirectToAction(nameof(Index), new { fromDate = fromDate?.ToString("yyyy-MM-dd"), toDate = toDate?.ToString("yyyy-MM-dd"), productId, pageNumber });
+            return RedirectToAction(nameof(Index), new { fromDate = fromDate?.ToString(DateFormats.HtmlDate), toDate = toDate?.ToString(DateFormats.HtmlDate), productId, pageNumber });
         }
         catch (Exception exception)
         {
             TempData["ErrorMessage"] = exception.Message;
-            return RedirectToAction(nameof(Index), new { fromDate = fromDate?.ToString("yyyy-MM-dd"), toDate = toDate?.ToString("yyyy-MM-dd"), productId, pageNumber });
+            return RedirectToAction(nameof(Index), new { fromDate = fromDate?.ToString(DateFormats.HtmlDate), toDate = toDate?.ToString(DateFormats.HtmlDate), productId, pageNumber });
         }
     }
 

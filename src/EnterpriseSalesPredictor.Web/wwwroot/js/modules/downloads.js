@@ -4,7 +4,7 @@
             var objectUrl = window.URL.createObjectURL(blob);
             var anchor = document.createElement("a");
             anchor.href = objectUrl;
-            anchor.download = fileName || "download.bin";
+            anchor.download = fileName || namespace.Constants.downloads.binaryFileName;
             document.body.appendChild(anchor);
             anchor.click();
             anchor.remove();

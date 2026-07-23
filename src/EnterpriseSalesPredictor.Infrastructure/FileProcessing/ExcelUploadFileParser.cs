@@ -1,16 +1,16 @@
 using ClosedXML.Excel;
+using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Application.Interfaces.Uploads;
 
 namespace EnterpriseSalesPredictor.Infrastructure.FileProcessing;
 
 public sealed class ExcelUploadFileParser : IUploadFileParser
 {
-    public string ParserKey => "excel";
+    public string ParserKey => UploadPolicy.ExcelParserKey;
 
     public bool CanHandle(string fileName)
     {
-        return fileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) ||
-               fileName.EndsWith(".xls", StringComparison.OrdinalIgnoreCase);
+        return UploadPolicy.ExcelExtensions.Any(extension => fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase));
     }
 
     public Task<UploadParseResult> ParseAsync(Stream stream, CancellationToken cancellationToken = default)

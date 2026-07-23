@@ -1,3 +1,4 @@
+using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Application.Interfaces.AccessManagement;
 using EnterpriseSalesPredictor.Application.Validators;
 using Microsoft.Extensions.Options;
@@ -44,7 +45,7 @@ public sealed class InMemoryAccessManagementService : IAccessManagementService
             .ToArray();
 
         var invalidPermissions = validatedPermissions
-            .Where(permission => !PermissionCatalog.All.Contains(permission, StringComparer.OrdinalIgnoreCase) && permission != "*")
+            .Where(permission => !PermissionCatalog.All.Contains(permission, StringComparer.OrdinalIgnoreCase) && permission != PermissionValues.All)
             .ToArray();
 
         if (invalidPermissions.Length > 0)
@@ -109,7 +110,7 @@ public sealed class InMemoryAccessManagementService : IAccessManagementService
             .ToArray();
 
         var invalidPermissions = permissions
-            .Where(permission => !PermissionCatalog.All.Contains(permission, StringComparer.OrdinalIgnoreCase) && permission != "*")
+            .Where(permission => !PermissionCatalog.All.Contains(permission, StringComparer.OrdinalIgnoreCase) && permission != PermissionValues.All)
             .ToArray();
 
         if (invalidPermissions.Length > 0)

@@ -10,7 +10,7 @@ namespace EnterpriseSalesPredictor.Api.Controllers;
 [ApiController]
 [Route("api/exports")]
 [Authorize]
-[Authorize(Policy = "Permission:exports:write")]
+[Authorize(Policy = PermissionPolicies.ExportsWrite)]
 public sealed class ExportsController : ControllerBase
 {
     private readonly IExportService _exportService;

@@ -10,8 +10,8 @@
     <p>Carga archivos Excel o delimitados por punto y coma para incorporar históricos de ventas.</p>
 
     <ul>
-        <li>Formatos permitidos: <strong>.xlsx</strong>, <strong>.xls</strong>, <strong>.csv</strong>, <strong>.txt</strong></li>
-        <li>Tamaño máximo: <strong>20 MB</strong></li>
+        <li>Formatos permitidos: <strong>@UploadPolicy.AllowedExtensionsText</strong></li>
+        <li>Tamaño máximo: <strong>@UploadPolicy.MaxFileSizeMegabytes MB</strong></li>
         <li>Delimitador para archivos planos: <strong>;</strong></li>
     </ul>
 
@@ -31,7 +31,7 @@
         <div class="upload-dropzone" id="upload-dropzone">
             <p class="upload-dropzone-title">Arrastra y suelta un archivo aquí</p>
             <p class="upload-dropzone-subtitle">o selecciona uno desde tu equipo.</p>
-            <input type="file" name="file" id="upload-file-input" accept=".xlsx,.xls,.csv,.txt" />
+            <input type="file" name="file" id="upload-file-input" accept="@UploadPolicy.AcceptAttribute" />
         </div>
 
         <div class="upload-progress" id="upload-progress" hidden>

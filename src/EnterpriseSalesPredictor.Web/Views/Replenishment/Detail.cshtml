@@ -42,9 +42,9 @@
             <div class="form-group">
                 <label asp-for="ReviewForm.Action">Acción</label>
                 <select asp-for="ReviewForm.Action">
-                    <option value="approve">Aprobar</option>
-                    <option value="reject">Rechazar</option>
-                    <option value="analysis">Marcar para análisis</option>
+                    <option value="@RecommendationReviewActions.Approve">Aprobar</option>
+                    <option value="@RecommendationReviewActions.Reject">Rechazar</option>
+                    <option value="@RecommendationReviewActions.Analysis">Marcar para análisis</option>
                 </select>
             </div>
 

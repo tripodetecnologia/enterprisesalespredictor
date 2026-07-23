@@ -33,17 +33,6 @@
         </div>
 
         <div class="form-group">
-            <label asp-for="Filters.CustomerId">Cliente</label>
-            <select asp-for="Filters.CustomerId">
-                <option value="">Todos los clientes</option>
-                @foreach (var customer in Model.Customers)
-                {
-                    <option value="@customer.Id">@customer.Name</option>
-                }
-            </select>
-        </div>
-
-        <div class="form-group">
             <label asp-for="Filters.ProductName">Producto</label>
             <select asp-for="Filters.ProductName">
                 <option value="">Seleccione...</option>
@@ -55,6 +44,17 @@
             <span asp-validation-for="Filters.ProductName" class="field-error"></span>
         </div>
 
+        <div class="form-group">
+            <label asp-for="Filters.CustomerId">Cliente</label>
+            <select asp-for="Filters.CustomerId">
+                <option value="">Todos los clientes</option>
+                @foreach (var customer in Model.Customers)
+                {
+                    <option value="@customer.Id">@customer.Name</option>
+                }
+            </select><span class="mb-1"> </span>
+        </div>
+        
         <button type="submit">Consultar abastecimiento</button>
     </form>
 </section>
@@ -90,7 +90,7 @@
             @foreach (var item in Model.Results.Items)
             {
                 <tr>
-                    <td>@item.ProjectionMonth.ToString("yyyy-MM")</td>
+                    <td>@item.ProjectionMonth.ToString(DateFormats.MonthKey)</td>
                     <td>@item.ProductName</td>
                     <td>@item.ProductType</td>
                     <td>@item.ProductReference</td>
@@ -105,8 +105,8 @@
                             <input type="hidden" name="ProductName" value="@item.ProductName" />
                             <input type="hidden" name="RecommendedUnits" value="@item.RecommendedUnits" />
                             <input type="hidden" name="CurrentStockUnits" value="@item.CurrentStockUnits" />
-                            <input type="hidden" name="fromDate" value="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")" />
-                            <input type="hidden" name="toDate" value="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="fromDate" value="@Model.Filters.FromDate?.ToString(DateFormats.HtmlDate)" />
+                            <input type="hidden" name="toDate" value="@Model.Filters.ToDate?.ToString(DateFormats.HtmlDate)" />
                             <input type="hidden" name="customerId" value="@Model.Filters.CustomerId" />
                             <input type="hidden" name="productName" value="@Model.Filters.ProductName" />
                             <input type="hidden" name="pageNumber" value="@Model.Results.PageNumber" />
@@ -121,14 +121,14 @@
         <div class="page-actions sales-pagination-bar">
             @if (Model.Results.PageNumber > 1)
             {
-                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")" asp-route-customerId="@Model.Filters.CustomerId" asp-route-productName="@Model.Filters.ProductName" asp-route-pageNumber="@(Model.Results.PageNumber - 1)">Anterior</a>
+                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.Filters.FromDate?.ToString(DateFormats.HtmlDate)" asp-route-toDate="@Model.Filters.ToDate?.ToString(DateFormats.HtmlDate)" asp-route-customerId="@Model.Filters.CustomerId" asp-route-productName="@Model.Filters.ProductName" asp-route-pageNumber="@(Model.Results.PageNumber - 1)">Anterior</a>
             }
 
             <span>Página @Model.Results.PageNumber de @Math.Max(Model.Results.TotalPages, 1)</span>
 
             @if (Model.Results.PageNumber < Model.Results.TotalPages)
             {
-                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")" asp-route-customerId="@Model.Filters.CustomerId" asp-route-productName="@Model.Filters.ProductName" asp-route-pageNumber="@(Model.Results.PageNumber + 1)">Siguiente</a>
+                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.Filters.FromDate?.ToString(DateFormats.HtmlDate)" asp-route-toDate="@Model.Filters.ToDate?.ToString(DateFormats.HtmlDate)" asp-route-customerId="@Model.Filters.CustomerId" asp-route-productName="@Model.Filters.ProductName" asp-route-pageNumber="@(Model.Results.PageNumber + 1)">Siguiente</a>
             }
         </div>
     }

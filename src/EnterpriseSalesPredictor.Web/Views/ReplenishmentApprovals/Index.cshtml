@@ -22,12 +22,12 @@
     <form asp-action="Index" method="get" class="audit-filters filter-panel">
         <div class="form-group">
             <label>Desde</label>
-            <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
+            <input type="date" name="fromDate" value="@Model.FromDate?.ToString(DateFormats.HtmlDate)" />
         </div>
 
         <div class="form-group">
             <label>Hasta</label>
-            <input type="date" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+            <input type="date" name="toDate" value="@Model.ToDate?.ToString(DateFormats.HtmlDate)" />
         </div>
 
         <div class="form-group">
@@ -78,7 +78,7 @@
             @foreach (var item in Model.Recommendations.Items)
             {
                 <tr>
-                    <td>@item.RecommendedForMonth.ToString("yyyy-MM")</td>
+                    <td>@item.RecommendedForMonth.ToString(DateFormats.MonthKey)</td>
                     <td>@item.ProductName</td>
                     <td>@item.ProductType</td>
                     <td>@item.ProductReference</td>
@@ -89,9 +89,9 @@
                             <form asp-action="Review" method="post" class="approval-form" data-modal-id="approval-approve-modal-@item.Id">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="RecommendationId" value="@item.Id" />
-                                <input type="hidden" name="Action" value="approve" />
-                                <input type="hidden" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
-                                <input type="hidden" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="Action" value="@RecommendationReviewActions.Approve" />
+                                <input type="hidden" name="fromDate" value="@Model.FromDate?.ToString(DateFormats.HtmlDate)" />
+                                <input type="hidden" name="toDate" value="@Model.ToDate?.ToString(DateFormats.HtmlDate)" />
                                 <input type="hidden" name="productId" value="@Model.ProductId" />
                                 <input type="hidden" name="pageNumber" value="@Model.Recommendations.PageNumber" />
                                 <button type="submit" class="button button-secondary">Aprobar</button>
@@ -99,9 +99,9 @@
                             <form asp-action="Review" method="post" class="approval-form" data-modal-id="approval-reject-modal-@item.Id">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="RecommendationId" value="@item.Id" />
-                                <input type="hidden" name="Action" value="reject" />
-                                <input type="hidden" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
-                                <input type="hidden" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="Action" value="@RecommendationReviewActions.Reject" />
+                                <input type="hidden" name="fromDate" value="@Model.FromDate?.ToString(DateFormats.HtmlDate)" />
+                                <input type="hidden" name="toDate" value="@Model.ToDate?.ToString(DateFormats.HtmlDate)" />
                                 <input type="hidden" name="productId" value="@Model.ProductId" />
                                 <input type="hidden" name="pageNumber" value="@Model.Recommendations.PageNumber" />
                                 <button type="submit" class="button button-secondary">Rechazar</button>
@@ -109,9 +109,9 @@
                             <form asp-action="Review" method="post" class="approval-form" data-modal-id="approval-analysis-modal-@item.Id">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="RecommendationId" value="@item.Id" />
-                                <input type="hidden" name="Action" value="analysis" />
-                                <input type="hidden" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
-                                <input type="hidden" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="Action" value="@RecommendationReviewActions.Analysis" />
+                                <input type="hidden" name="fromDate" value="@Model.FromDate?.ToString(DateFormats.HtmlDate)" />
+                                <input type="hidden" name="toDate" value="@Model.ToDate?.ToString(DateFormats.HtmlDate)" />
                                 <input type="hidden" name="productId" value="@Model.ProductId" />
                                 <input type="hidden" name="pageNumber" value="@Model.Recommendations.PageNumber" />
                                 <button type="submit" class="button button-secondary">Análisis</button>
@@ -130,7 +130,7 @@
         <div class="page-actions sales-pagination-bar">
             @if (Model.Recommendations.PageNumber > 1)
             {
-                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")" asp-route-productId="@Model.ProductId" asp-route-pageNumber="@(Model.Recommendations.PageNumber - 1)">Anterior</a>
+                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.FromDate?.ToString(DateFormats.HtmlDate)" asp-route-toDate="@Model.ToDate?.ToString(DateFormats.HtmlDate)" asp-route-productId="@Model.ProductId" asp-route-pageNumber="@(Model.Recommendations.PageNumber - 1)">Anterior</a>
             }
 
             <div class="sales-page-numbers">
@@ -146,14 +146,14 @@
                     }
                     else
                     {
-                        <a class="sales-page-link" asp-action="Index" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")" asp-route-productId="@Model.ProductId" asp-route-pageNumber="@pageIndex">@pageIndex</a>
+                        <a class="sales-page-link" asp-action="Index" asp-route-fromDate="@Model.FromDate?.ToString(DateFormats.HtmlDate)" asp-route-toDate="@Model.ToDate?.ToString(DateFormats.HtmlDate)" asp-route-productId="@Model.ProductId" asp-route-pageNumber="@pageIndex">@pageIndex</a>
                     }
                 }
             </div>
 
             @if (Model.Recommendations.PageNumber < Model.Recommendations.TotalPages)
             {
-                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")" asp-route-productId="@Model.ProductId" asp-route-pageNumber="@(Model.Recommendations.PageNumber + 1)">Siguiente</a>
+                <a class="button button-secondary" asp-action="Index" asp-route-fromDate="@Model.FromDate?.ToString(DateFormats.HtmlDate)" asp-route-toDate="@Model.ToDate?.ToString(DateFormats.HtmlDate)" asp-route-productId="@Model.ProductId" asp-route-pageNumber="@(Model.Recommendations.PageNumber + 1)">Siguiente</a>
             }
         </div>
     }
@@ -163,12 +163,12 @@
     <script>
         @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
         {
-            <text>window.appUi.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StatusMessage)), "success");</text>
+            <text>window.appUi.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StatusMessage)), window.EnterpriseSalesPredictor.Constants.uiVariants.success);</text>
         }
 
         @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
         {
-            <text>window.appUi.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ErrorMessage)), "error");</text>
+            <text>window.appUi.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ErrorMessage)), window.EnterpriseSalesPredictor.Constants.uiVariants.error);</text>
         }
 
         document.querySelectorAll('.approval-form').forEach(function (form) {

@@ -1,6 +1,7 @@
 using EnterpriseSalesPredictor.Application.DTOs.Dashboard;
 using EnterpriseSalesPredictor.Application.Interfaces.Dashboard;
 using EnterpriseSalesPredictor.Domain.Entities;
+using EnterpriseSalesPredictor.Domain.Rules;
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -125,9 +126,9 @@ public sealed class DashboardReadService : IDashboardReadService
         }
 
         var lowStockProducts = await _dbContext.Products.AsNoTracking()
-            .Where(product => product.AvailableUnits <= 5)
+            .Where(product => product.AvailableUnits <= DashboardAlertPolicy.LowStockUnits)
             .OrderBy(product => product.AvailableUnits)
-            .Take(3)
+            .Take(DashboardAlertPolicy.LowStockAlertLimit)
             .ToListAsync(cancellationToken);
 
         foreach (var product in lowStockProducts)
@@ -155,7 +156,7 @@ public sealed class DashboardReadService : IDashboardReadService
         if (topCustomer is not null && totalAmount > 0m)
         {
             var share = topCustomer.Amount / totalAmount;
-            if (share >= 0.5m)
+            if (share >= DashboardAlertPolicy.CustomerConcentrationThreshold)
             {
                 alerts.Add(new DashboardAlertDto
                 {
@@ -167,8 +168,8 @@ public sealed class DashboardReadService : IDashboardReadService
         }
 
         var today = DateTime.UtcNow.Date;
-        var previousStart = today.AddDays(-14);
-        var recentStart = today.AddDays(-7);
+        var previousStart = today.AddDays(-DashboardAlertPolicy.PreviousSalesWindowDays);
+        var recentStart = today.AddDays(-DashboardAlertPolicy.RecentSalesWindowDays);
 
         var previousWeekSales = await _dbContext.Sales.AsNoTracking()
             .Where(sale => sale.SaleDate >= previousStart && sale.SaleDate < recentStart)
@@ -178,13 +179,13 @@ public sealed class DashboardReadService : IDashboardReadService
             .Where(sale => sale.SaleDate >= recentStart && sale.SaleDate < today.AddDays(1))
             .SumAsync(sale => (decimal?)sale.SaleAmount, cancellationToken) ?? 0m;
 
-        if (previousWeekSales > 0m && recentWeekSales < previousWeekSales * 0.8m)
+        if (previousWeekSales > 0m && recentWeekSales < previousWeekSales * DashboardAlertPolicy.WeeklySlowdownMultiplier)
         {
             alerts.Add(new DashboardAlertDto
             {
                 Severity = "warning",
                 Title = "Desaceleración semanal de ventas",
-                Message = $"Las ventas de los últimos 7 días ({recentWeekSales:N0}) están más de un 20% por debajo del periodo anterior de 7 días ({previousWeekSales:N0})."
+                Message = $"Las ventas de los últimos {DashboardAlertPolicy.RecentSalesWindowDays} días ({recentWeekSales:N0}) están más de un {DashboardAlertPolicy.WeeklySlowdownPercent:N0}% por debajo del periodo anterior de {DashboardAlertPolicy.RecentSalesWindowDays} días ({previousWeekSales:N0})."
             });
         }
 
@@ -210,9 +211,9 @@ public sealed class DashboardReadService : IDashboardReadService
     {
         if (limit <= 0)
         {
-            return 5;
+            return DashboardAlertPolicy.DefaultBreakdownLimit;
         }
 
-        return Math.Min(limit, 20);
+        return Math.Min(limit, DashboardAlertPolicy.MaximumBreakdownLimit);
     }
 }

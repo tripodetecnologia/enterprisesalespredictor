@@ -65,8 +65,8 @@ public sealed class ApiIntegrationTests
         Assert.Multiple(() =>
         {
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(payload.ValueKind, Is.EqualTo(JsonValueKind.Array));
-            Assert.That(payload.GetArrayLength(), Is.EqualTo(5));
+            Assert.That(payload.ValueKind, Is.EqualTo(JsonValueKind.Object));
+            Assert.That(payload.GetProperty("items").GetArrayLength(), Is.EqualTo(5));
         });
     }
 

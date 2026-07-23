@@ -53,7 +53,7 @@ public sealed class AuthController : ControllerBase
     [Authorize]
     public IActionResult Permissions()
     {
-        var permissions = User.FindAll("permission").Select(claim => claim.Value);
+        var permissions = User.FindAll(PermissionClaimTypes.Permission).Select(claim => claim.Value);
         return Ok(new
         {
             user = User.Identity?.Name,
@@ -68,7 +68,7 @@ public sealed class AuthController : ControllerBase
         Guard.AgainstNullOrWhiteSpace(request.Module, nameof(request.Module));
         Guard.AgainstNullOrWhiteSpace(request.Action, nameof(request.Action));
 
-        var policy = $"Permission:{request.Module}:{request.Action}";
+        var policy = $"{PermissionPolicies.Prefix}{request.Module}:{request.Action}";
         var result = await _authorizationService.AuthorizeAsync(User, policy);
 
         if (result.Succeeded)

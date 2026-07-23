@@ -1,4 +1,5 @@
 using ClosedXML.Excel;
+using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Application.Interfaces.Exports;
 using EnterpriseSalesPredictor.Application.Interfaces.Reports;
 using EnterpriseSalesPredictor.Application.Interfaces.Sales;
@@ -9,8 +10,6 @@ namespace EnterpriseSalesPredictor.Infrastructure.Exports;
 
 public sealed class ExcelExportService : IExportService
 {
-    private const string ExcelContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-
     private readonly AppDbContext _dbContext;
     private readonly IReportReadService _reportReadService;
     private readonly ISalesReadService _salesReadService;
@@ -67,7 +66,7 @@ public sealed class ExcelExportService : IExportService
             worksheet.Columns().AdjustToContents();
         }
 
-        return CreateFile($"reports-{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx", workbook);
+        return CreateFile($"reports-{DateTime.UtcNow.ToString(DateFormats.ExportTimestamp)}{ExportFormats.ExcelExtension}", workbook);
     }
 
     public async Task<ExportFileDto> ExportFilteredSalesAsync(SalesQueryCriteria criteria, CancellationToken cancellationToken = default)
@@ -107,7 +106,7 @@ public sealed class ExcelExportService : IExportService
         }
 
         worksheet.Columns().AdjustToContents();
-        return CreateFile($"sales-filtered-{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx", workbook);
+        return CreateFile($"sales-filtered-{DateTime.UtcNow.ToString(DateFormats.ExportTimestamp)}{ExportFormats.ExcelExtension}", workbook);
     }
 
     public async Task<ExportFileDto> ExportBaseDataAsync(CancellationToken cancellationToken = default)
@@ -191,7 +190,7 @@ public sealed class ExcelExportService : IExportService
             worksheet.Columns().AdjustToContents();
         }
 
-        return CreateFile($"base-data-{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx", workbook);
+        return CreateFile($"base-data-{DateTime.UtcNow.ToString(DateFormats.ExportTimestamp)}{ExportFormats.ExcelExtension}", workbook);
     }
 
     private static void WriteSalesHeader(IXLWorksheet worksheet)
@@ -235,7 +234,7 @@ public sealed class ExcelExportService : IExportService
         return new ExportFileDto
         {
             FileName = fileName,
-            ContentType = ExcelContentType,
+            ContentType = ExportFormats.ExcelContentType,
             Content = stream.ToArray()
         };
     }

@@ -14,7 +14,7 @@
             }
 
             var date = new Date(value);
-            return Number.isNaN(date.getTime()) ? value : date.toISOString().slice(0, 10);
+            return Number.isNaN(date.getTime()) ? value : date.toISOString().split("T")[0];
         },
         formatDateTime: function (value) {
             if (!value) {
@@ -22,7 +22,13 @@
             }
 
             var date = new Date(value);
-            return Number.isNaN(date.getTime()) ? value : date.toISOString().replace("T", " ").slice(0, 16);
+            return Number.isNaN(date.getTime()) ? value : formatDateTimeParts(date);
         }
     };
+
+    function formatDateTimeParts(date) {
+        var parts = date.toISOString().split("T");
+        var time = parts[1].split(":");
+        return parts[0] + " " + time[0] + ":" + time[1];
+    }
 })(window.EnterpriseSalesPredictor);

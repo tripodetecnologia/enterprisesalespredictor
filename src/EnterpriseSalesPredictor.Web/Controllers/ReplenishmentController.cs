@@ -17,7 +17,7 @@ public sealed class ReplenishmentController : Controller
     }
 
     [HttpGet]
-    [RequirePermission("replenishment:read")]
+    [RequirePermission(Permissions.ReplenishmentRead)]
     public async Task<IActionResult> Index([FromQuery] ReplenishmentProjectionFilterViewModel filters, int pageNumber = 1, CancellationToken cancellationToken = default)
     {
         if (filters.FromDate.HasValue && filters.ToDate.HasValue && string.IsNullOrWhiteSpace(filters.ProductName))
@@ -31,7 +31,7 @@ public sealed class ReplenishmentController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [RequirePermission("replenishment:write")]
+    [RequirePermission(Permissions.ReplenishmentWrite)]
     public async Task<IActionResult> Submit(ReplenishmentProjectionViewModel model, ReplenishmentProjectionFilterViewModel filters, int pageNumber = 1, CancellationToken cancellationToken = default)
     {
         try
@@ -40,8 +40,8 @@ public sealed class ReplenishmentController : Controller
             TempData["StatusMessage"] = "Sugerencia enviada a aprobación correctamente.";
             return RedirectToAction(nameof(Index), new
             {
-                fromDate = filters.FromDate?.ToString("yyyy-MM-dd"),
-                toDate = filters.ToDate?.ToString("yyyy-MM-dd"),
+                fromDate = filters.FromDate?.ToString(DateFormats.HtmlDate),
+                toDate = filters.ToDate?.ToString(DateFormats.HtmlDate),
                 customerId = filters.CustomerId,
                 productName = filters.ProductName,
                 pageNumber

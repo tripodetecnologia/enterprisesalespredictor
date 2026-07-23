@@ -63,10 +63,10 @@ public sealed class ExportsApiClient
 
         var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
         var contentType = response.Content.Headers.ContentType?.ToString()
-            ?? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            ?? ExportFormats.ExcelContentType;
         var fileName = response.Content.Headers.ContentDisposition?.FileNameStar
             ?? response.Content.Headers.ContentDisposition?.FileName
-            ?? $"export-{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
+            ?? $"export-{DateTime.UtcNow.ToString(DateFormats.ExportTimestamp)}{ExportFormats.ExcelExtension}";
 
         return new ExportDownloadResult(bytes, contentType, fileName.Trim('"'));
     }

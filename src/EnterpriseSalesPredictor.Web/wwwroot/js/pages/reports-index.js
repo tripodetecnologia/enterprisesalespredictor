@@ -23,20 +23,16 @@
 
             async function downloadWithState(button, message, url) {
                 button.disabled = true;
-                namespace.Modules.statePanels.showAlert(statusSection, "info", "Exportando", message);
+                namespace.Modules.statePanels.showAlert(statusSection, namespace.Constants.uiVariants.info, "Exportando", message);
 
                 try {
-                    var result = await namespace.Utils.http.fetchBlob(url, {
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest"
-                        }
-                    });
+                    var result = await namespace.Utils.http.fetchBlob(url);
 
-                    namespace.Modules.downloads.saveBlob(result.blob, result.fileName || "export.xlsx");
-                    namespace.Modules.statePanels.showAlert(statusSection, "success", "Completado", "La exportación se descargó correctamente.");
-                    namespace.appUi.toast("La exportación se descargó correctamente.", "success");
+                    namespace.Modules.downloads.saveBlob(result.blob, result.fileName || namespace.Constants.downloads.exportFileName);
+                    namespace.Modules.statePanels.showAlert(statusSection, namespace.Constants.uiVariants.success, "Completado", "La exportación se descargó correctamente.");
+                    namespace.appUi.toast("La exportación se descargó correctamente.", namespace.Constants.uiVariants.success);
                 } catch (error) {
-                    namespace.Modules.statePanels.showAlert(statusSection, "error", "Exportación fallida", error.message || "La exportación falló.");
+                    namespace.Modules.statePanels.showAlert(statusSection, namespace.Constants.uiVariants.error, "Exportación fallida", error.message || "La exportación falló.");
                 } finally {
                     button.disabled = false;
                 }

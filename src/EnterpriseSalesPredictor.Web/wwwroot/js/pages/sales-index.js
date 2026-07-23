@@ -21,13 +21,13 @@
 
             form.addEventListener("submit", async function (event) {
                 event.preventDefault();
-                pageNumberInput.value = "1";
+                pageNumberInput.value = String(namespace.Constants.pagination.firstPage);
                 await loadPage();
             });
 
             prevButton.addEventListener("click", async function () {
-                var currentPage = parseInt(pageNumberInput.value || "1", 10);
-                if (currentPage <= 1) {
+                var currentPage = parseInt(pageNumberInput.value || String(namespace.Constants.pagination.firstPage), 10);
+                if (currentPage <= namespace.Constants.pagination.firstPage) {
                     return;
                 }
 
@@ -36,7 +36,7 @@
             });
 
             nextButton.addEventListener("click", async function () {
-                var currentPage = parseInt(pageNumberInput.value || "1", 10);
+                var currentPage = parseInt(pageNumberInput.value || String(namespace.Constants.pagination.firstPage), 10);
                 pageNumberInput.value = String(currentPage + 1);
                 await loadPage();
             });
@@ -44,21 +44,17 @@
             exportButton.addEventListener("click", async function () {
                 await namespace.appUi.confirm("sales-export-modal", async function () {
                     exportButton.disabled = true;
-                    namespace.Modules.statePanels.showAlert(exportStatus, "info", "Exportando", "Preparando la exportación de ventas...");
+                    namespace.Modules.statePanels.showAlert(exportStatus, namespace.Constants.uiVariants.info, "Exportando", "Preparando la exportación de ventas...");
                     namespace.Modules.statePanels.clear(error);
 
                     try {
-                        var result = await namespace.Utils.http.fetchBlob("/Exports/FilteredSales?" + buildSearchParams(form).toString(), {
-                            headers: {
-                                "X-Requested-With": "XMLHttpRequest"
-                            }
-                        });
-                        namespace.Modules.downloads.saveBlob(result.blob, result.fileName || "sales-export.xlsx");
-                        namespace.Modules.statePanels.showAlert(exportStatus, "success", "Completado", "La exportación de ventas se descargó correctamente.");
-                        namespace.appUi.toast("La exportación de ventas se descargó correctamente.", "success");
+                        var result = await namespace.Utils.http.fetchBlob("/Exports/FilteredSales?" + buildSearchParams(form).toString());
+                        namespace.Modules.downloads.saveBlob(result.blob, result.fileName || namespace.Constants.downloads.salesExportFileName);
+                        namespace.Modules.statePanels.showAlert(exportStatus, namespace.Constants.uiVariants.success, "Completado", "La exportación de ventas se descargó correctamente.");
+                        namespace.appUi.toast("La exportación de ventas se descargó correctamente.", namespace.Constants.uiVariants.success);
                     } catch (downloadError) {
-                        namespace.Modules.statePanels.showAlert(error, "error", "Exportación fallida", downloadError.message || "Se produjo un error inesperado al exportar las ventas.");
-                        namespace.Modules.statePanels.showAlert(exportStatus, "error", "Exportación fallida", "La exportación de ventas falló.");
+                        namespace.Modules.statePanels.showAlert(error, namespace.Constants.uiVariants.error, "Exportación fallida", downloadError.message || "Se produjo un error inesperado al exportar las ventas.");
+                        namespace.Modules.statePanels.showAlert(exportStatus, namespace.Constants.uiVariants.error, "Exportación fallida", "La exportación de ventas falló.");
                     } finally {
                         exportButton.disabled = false;
                     }
@@ -73,16 +69,12 @@
                 nextButton.disabled = true;
 
                 try {
-                    var payload = await namespace.Utils.http.fetchJson("/Sales/Query?" + buildSearchParams(form).toString(), {
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest"
-                        }
-                    });
+                    var payload = await namespace.Utils.http.fetchJson("/Sales/Query?" + buildSearchParams(form).toString());
 
                     namespace.Modules.tableRenderer.renderRows(body, payload.items, renderRowHtml, 9);
                     empty.hidden = payload.items.length !== 0;
 
-                    pageIndicator.textContent = "Página " + Math.max(payload.pageNumber, 1) + " de " + Math.max(payload.totalPages, 1);
+                    pageIndicator.textContent = "Página " + Math.max(payload.pageNumber, namespace.Constants.pagination.firstPage) + " de " + Math.max(payload.totalPages, namespace.Constants.pagination.firstPage);
                     resultsSummary.textContent = buildSummary(payload);
                     prevButton.disabled = payload.pageNumber <= 1;
                     nextButton.disabled = payload.pageNumber >= payload.totalPages;
@@ -91,7 +83,7 @@
                     body.innerHTML = "";
                     pageNumbers.innerHTML = "";
                     resultsSummary.textContent = "Mostrando 0 registros.";
-                    namespace.Modules.statePanels.showAlert(error, "error", "Consulta fallida", fetchError.message || "Se produjo un error inesperado al cargar los resultados de ventas.");
+                    namespace.Modules.statePanels.showAlert(error, namespace.Constants.uiVariants.error, "Consulta fallida", fetchError.message || "Se produjo un error inesperado al cargar los resultados de ventas.");
                 } finally {
                     loading.hidden = true;
                 }
@@ -115,20 +107,20 @@
                     return "Mostrando 0 registros.";
                 }
 
-                var start = ((payload.pageNumber - 1) * payload.pageSize) + 1;
-                var end = start + payload.items.length - 1;
+                var start = ((payload.pageNumber - namespace.Constants.pagination.firstPage) * payload.pageSize) + namespace.Constants.pagination.firstPage;
+                var end = start + payload.items.length - namespace.Constants.pagination.firstPage;
                 return "Mostrando " + start + " a " + end + " de " + payload.totalCount + " registros totales.";
             }
 
             function renderPageNumbers(payload) {
                 pageNumbers.innerHTML = "";
 
-                if (!payload.totalPages || payload.totalPages <= 1) {
+                if (!payload.totalPages || payload.totalPages <= namespace.Constants.pagination.firstPage) {
                     return;
                 }
 
-                var start = Math.max(1, payload.pageNumber - 2);
-                var end = Math.min(payload.totalPages, payload.pageNumber + 2);
+                var start = Math.max(namespace.Constants.pagination.firstPage, payload.pageNumber - namespace.Constants.pagination.pageLinkRadius);
+                var end = Math.min(payload.totalPages, payload.pageNumber + namespace.Constants.pagination.pageLinkRadius);
 
                 for (var page = start; page <= end; page++) {
                     var button = document.createElement("button");
@@ -139,7 +131,7 @@
                     button.dataset.page = String(page);
                     button.addEventListener("click", async function (event) {
                         var target = event.currentTarget;
-                        pageNumberInput.value = target.dataset.page || "1";
+                        pageNumberInput.value = target.dataset.page || String(namespace.Constants.pagination.firstPage);
                         await loadPage();
                     });
                     pageNumbers.appendChild(button);

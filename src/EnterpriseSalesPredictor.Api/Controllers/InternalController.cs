@@ -5,7 +5,7 @@ namespace EnterpriseSalesPredictor.Api.Controllers;
 
 [ApiController]
 [Route("api/internal")]
-[Authorize(Policy = "Permission:system:read")]
+[Authorize(Policy = PermissionPolicies.SystemRead)]
 public sealed class InternalController : ControllerBase
 {
     [HttpGet("status")]

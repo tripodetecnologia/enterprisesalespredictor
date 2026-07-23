@@ -7,7 +7,7 @@ namespace EnterpriseSalesPredictor.Api.Controllers;
 [ApiController]
 [Route("api/sales")]
 [Authorize]
-[Authorize(Policy = "Permission:sales:read")]
+[Authorize(Policy = PermissionPolicies.SalesRead)]
 public sealed class SalesController : ControllerBase
 {
     private readonly ISalesReadService _salesReadService;

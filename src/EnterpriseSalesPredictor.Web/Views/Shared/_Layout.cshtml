@@ -24,6 +24,11 @@
             return string.IsNullOrWhiteSpace(TempData["ErrorMessage"] as string) ? "app-notification app-notification-success" : "app-notification app-notification-error";
         }
 
+        bool HasPermission(string permission)
+        {
+            return User.Claims.Any(claim => claim.Type == PermissionClaimTypes.Permission && (claim.Value == permission || claim.Value == PermissionValues.All));
+        }
+
         var notificationMessage = TempData["StatusMessage"] as string ?? TempData["ErrorMessage"] as string;
     }
 
@@ -38,38 +43,38 @@
                 @if (User.Identity?.IsAuthenticated ?? false)
                 {
                     <a class="@NavClass("Home")" asp-area="" asp-controller="Home" asp-action="Index">Tablero de control</a>
-                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "uploads:read" || claim.Value == "*")))
+                    @if (HasPermission(Permissions.UploadsRead))
                     {
                         <a class="@NavClass("Uploads")" asp-area="" asp-controller="Uploads" asp-action="Index">Cargas</a>
                     }
 
-                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "sales:read" || claim.Value == "*")))
+                    @if (HasPermission(Permissions.SalesRead))
                     {
                         <a class="@NavClass("Sales")" asp-area="" asp-controller="Sales" asp-action="Index">Consulta de ventas</a>
                     }       
 
-                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "reports:read" || claim.Value == "*")))
+                    @if (HasPermission(Permissions.ReportsRead))
                     {
                         <a class="@NavClass("Reports")" asp-area="" asp-controller="Reports" asp-action="Index">Reportes</a>
                     }
 
-                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "forecasts:write" || claim.Value == "*")))
+                    @if (HasPermission(Permissions.ForecastsWrite))
                     {
                         <a class="@NavClass("Forecasts")" asp-area="" asp-controller="Forecasts" asp-action="Index">Proyecciones de ventas</a>
                     }
 
-                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "replenishment:read" || claim.Value == "*")))
+                    @if (HasPermission(Permissions.ReplenishmentRead))
                     {
                         <a class="@NavClass("Replenishment")" asp-area="" asp-controller="Replenishment" asp-action="Index">Abastecimiento</a>
                         <a class="@NavClass("ReplenishmentApprovals")" asp-area="" asp-controller="ReplenishmentApprovals" asp-action="Index">Aprobación Abastecimiento</a>
                     }
                     
-                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "users:read" || claim.Value == "*")))
+                    @if (HasPermission(Permissions.UsersRead))
                     {
                         <a class="@NavClass("AccessManagement")" asp-area="" asp-controller="AccessManagement" asp-action="Index">Gestión de accesos</a>
                     }
 
-                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "audit:read" || claim.Value == "*")))
+                    @if (HasPermission(Permissions.AuditRead))
                     {
                         <a class="@NavClass("Audit")" asp-area="" asp-controller="Audit" asp-action="Index">Auditoría</a>
                     }

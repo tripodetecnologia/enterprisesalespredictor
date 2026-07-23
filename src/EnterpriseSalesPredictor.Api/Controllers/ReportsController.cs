@@ -7,7 +7,7 @@ namespace EnterpriseSalesPredictor.Api.Controllers;
 [ApiController]
 [Route("api/reports")]
 [Authorize]
-[Authorize(Policy = "Permission:reports:read")]
+[Authorize(Policy = PermissionPolicies.ReportsRead)]
 public sealed class ReportsController : ControllerBase
 {
     private readonly IReportReadService _reportReadService;

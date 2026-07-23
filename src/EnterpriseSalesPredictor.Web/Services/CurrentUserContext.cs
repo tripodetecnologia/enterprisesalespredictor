@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using EnterpriseSalesPredictor.Application.Constants;
 
 namespace EnterpriseSalesPredictor.Web.Services;
 
@@ -10,7 +11,7 @@ public sealed record CurrentUserContext(
 {
     public bool HasPermission(string permission)
     {
-        return Permissions.Contains("*") ||
+        return Permissions.Contains(PermissionValues.All) ||
                Permissions.Contains(permission) ||
                Permissions.Any(candidate =>
                    candidate.EndsWith(":*", StringComparison.OrdinalIgnoreCase) &&
@@ -21,7 +22,7 @@ public sealed record CurrentUserContext(
     {
         var claimList = claims.ToList();
         var permissions = claimList
-            .Where(claim => claim.Type == "permission")
+            .Where(claim => claim.Type == PermissionClaimTypes.Permission)
             .Select(claim => claim.Value)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();

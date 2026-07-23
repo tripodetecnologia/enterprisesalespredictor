@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EnterpriseSalesPredictor.Web.Controllers;
 
 [Authorize]
-[RequirePermission("users:read")]
+[RequirePermission(Permissions.UsersRead)]
 public sealed class AccessManagementController : Controller
 {
     private readonly AccessManagementApiClient _accessManagementApiClient;
@@ -26,7 +26,7 @@ public sealed class AccessManagementController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [RequirePermission("users:write")]
+    [RequirePermission(Permissions.UsersWrite)]
     public async Task<IActionResult> CreateUser(CreateAccessUserFormViewModel model, CancellationToken cancellationToken)
     {
         model.Permissions = ParsePermissions(model.PermissionsRaw);
@@ -56,7 +56,7 @@ public sealed class AccessManagementController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [RequirePermission("roles:write")]
+    [RequirePermission(Permissions.RolesWrite)]
     public async Task<IActionResult> UpdateRolePermissions(UpdateRolePermissionsFormViewModel model, CancellationToken cancellationToken)
     {
         model.Permissions = ParsePermissions(model.PermissionsRaw);

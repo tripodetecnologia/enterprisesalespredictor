@@ -18,7 +18,7 @@ public sealed class AuditController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = "Permission:audit:read")]
+    [Authorize(Policy = PermissionPolicies.AuditRead)]
     public async Task<IActionResult> GetAuditLogsAsync(CancellationToken cancellationToken)
     {
         var logs = await _auditLogService.GetAuditLogsAsync(cancellationToken);
@@ -26,7 +26,7 @@ public sealed class AuditController : ControllerBase
     }
 
     [HttpPost("exports")]
-    [Authorize(Policy = "Permission:exports:write")]
+    [Authorize(Policy = PermissionPolicies.ExportsWrite)]
     public async Task<IActionResult> RegisterExportAsync(RegisterExportAuditRequest request, CancellationToken cancellationToken)
     {
         var actor = GetActor();
@@ -44,11 +44,11 @@ public sealed class AuditController : ControllerBase
     }
 
     [HttpPost("forecasts")]
-    [Authorize(Policy = "Permission:forecasts:write")]
+    [Authorize(Policy = PermissionPolicies.ForecastsWrite)]
     public async Task<IActionResult> RegisterForecastAsync(RegisterForecastAuditRequest request, CancellationToken cancellationToken)
     {
         var actor = GetActor();
-        var details = $"FromDate={request.FromDate:yyyy-MM-dd}; ToDate={request.ToDate:yyyy-MM-dd}";
+        var details = $"FromDate={request.FromDate.ToString(DateFormats.HtmlDate)}; ToDate={request.ToDate.ToString(DateFormats.HtmlDate)}";
 
         var entry = await _auditLogService.RecordAsync(new CreateAuditLogCommand
         {
@@ -62,7 +62,7 @@ public sealed class AuditController : ControllerBase
     }
 
     [HttpPost("replenishment/recommendations")]
-    [Authorize(Policy = "Permission:replenishment:write")]
+    [Authorize(Policy = PermissionPolicies.ReplenishmentWrite)]
     public async Task<IActionResult> RegisterRecommendationAsync(RegisterRecommendationAuditRequest request, CancellationToken cancellationToken)
     {
         var actor = GetActor();
@@ -80,7 +80,7 @@ public sealed class AuditController : ControllerBase
     }
 
     [HttpPost("replenishment/reviews")]
-    [Authorize(Policy = "Permission:replenishment:write")]
+    [Authorize(Policy = PermissionPolicies.ReplenishmentWrite)]
     public async Task<IActionResult> RegisterRecommendationReviewAsync(ReviewRecommendationAuditRequest request, CancellationToken cancellationToken)
     {
         var actor = GetActor();

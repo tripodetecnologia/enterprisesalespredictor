@@ -1,3 +1,4 @@
+using EnterpriseSalesPredictor.Application.Constants;
 using Microsoft.AspNetCore.Authorization;
 
 namespace EnterpriseSalesPredictor.Api.Authorization;
@@ -6,9 +7,9 @@ public sealed class PermissionAuthorizationHandler : AuthorizationHandler<Permis
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
     {
-        var permissions = context.User.FindAll("permission").Select(claim => claim.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var permissions = context.User.FindAll(PermissionClaimTypes.Permission).Select(claim => claim.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        if (permissions.Contains(requirement.Permission) || permissions.Contains("*"))
+        if (permissions.Contains(requirement.Permission) || permissions.Contains(PermissionValues.All))
         {
             context.Succeed(requirement);
             return Task.CompletedTask;

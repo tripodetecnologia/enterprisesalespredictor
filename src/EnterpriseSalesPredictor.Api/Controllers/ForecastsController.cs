@@ -8,7 +8,7 @@ namespace EnterpriseSalesPredictor.Api.Controllers;
 [ApiController]
 [Route("api/forecasts")]
 [Authorize]
-[Authorize(Policy = "Permission:forecasts:write")]
+[Authorize(Policy = PermissionPolicies.ForecastsWrite)]
 public sealed class ForecastsController : ControllerBase
 {
     private readonly IForecastService _forecastService;

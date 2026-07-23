@@ -47,7 +47,14 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await dbContext.Database.MigrateAsync();
+    if (dbContext.Database.IsRelational())
+    {
+        await dbContext.Database.MigrateAsync();
+    }
+    else
+    {
+        await dbContext.Database.EnsureCreatedAsync();
+    }
 
     var securityBootstrapper = scope.ServiceProvider.GetRequiredService<ISecurityBootstrapper>();
     await securityBootstrapper.EnsureSeededAsync();

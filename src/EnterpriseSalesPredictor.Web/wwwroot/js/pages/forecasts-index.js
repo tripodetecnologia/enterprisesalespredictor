@@ -32,27 +32,27 @@
             let productPages = document.getElementById("forecast-product-pages");
             let productSummary = document.getElementById("forecast-product-summary");
 
-            let customerState = { items: [], page: 1, pageSize: 10 };
-            let productState = { items: [], page: 1, pageSize: 10 };
+            let customerState = { items: [], page: namespace.Constants.pagination.firstPage, pageSize: namespace.Constants.pagination.forecastPageSize };
+            let productState = { items: [], page: namespace.Constants.pagination.firstPage, pageSize: namespace.Constants.pagination.forecastPageSize };
 
             form.addEventListener("submit", async function (event) {
                 event.preventDefault();
                 let request = buildPayload(form);
 
                 if (!request.fromDate) {
-                    namespace.Modules.statePanels.showAlert(error, "error", "Dato requerido", "La fecha de inicio es obligatoria.");
+                    namespace.Modules.statePanels.showAlert(error, namespace.Constants.uiVariants.error, "Dato requerido", "La fecha de inicio es obligatoria.");
                     hideResults();
                     return;
                 }
 
                 if (!request.toDate) {
-                    namespace.Modules.statePanels.showAlert(error, "error", "Dato requerido", "La fecha de fin es obligatoria.");
+                    namespace.Modules.statePanels.showAlert(error, namespace.Constants.uiVariants.error, "Dato requerido", "La fecha de fin es obligatoria.");
                     hideResults();
                     return;
                 }
 
                 if (!request.productName) {
-                    namespace.Modules.statePanels.showAlert(error, "error", "Dato requerido", "El producto es obligatorio.");
+                    namespace.Modules.statePanels.showAlert(error, namespace.Constants.uiVariants.error, "Dato requerido", "El producto es obligatorio.");
                     hideResults();
                     return;
                 }
@@ -65,8 +65,7 @@
                     let payload = await namespace.Utils.http.fetchJson("/Forecasts/Generate", {
                         method: "POST",
                         headers: {
-                            "Content-Type": "application/json",
-                            "X-Requested-With": "XMLHttpRequest"
+                            "Content-Type": namespace.Constants.http.jsonContentType
                         },
                         body: JSON.stringify(request)
                     });
@@ -74,25 +73,25 @@
                     renderSummary(payload);
 
                     customerState.items = payload.customerMonthlyForecasts || [];
-                    customerState.page = 1;
+                    customerState.page = namespace.Constants.pagination.firstPage;
                     renderCustomerTable();
 
                     productState.items = payload.productMonthlyForecasts || [];
-                    productState.page = 1;
+                    productState.page = namespace.Constants.pagination.firstPage;
                     renderProductTable();
 
                     result.hidden = false;
                     customerSection.hidden = false;
                     productSection.hidden = false;
                 } catch (requestError) {
-                    namespace.Modules.statePanels.showAlert(error, "error", "Proyección fallida", requestError.message || "Se produjo un error inesperado al generar la proyección.");
+                    namespace.Modules.statePanels.showAlert(error, namespace.Constants.uiVariants.error, "Proyección fallida", requestError.message || "Se produjo un error inesperado al generar la proyección.");
                 } finally {
                     loading.hidden = true;
                 }
             });
 
             customerPrev.addEventListener("click", function () {
-                if (customerState.page > 1) {
+                if (customerState.page > namespace.Constants.pagination.firstPage) {
                     customerState.page--;
                     renderCustomerTable();
                 }
@@ -106,7 +105,7 @@
             });
 
             productPrev.addEventListener("click", function () {
-                if (productState.page > 1) {
+                if (productState.page > namespace.Constants.pagination.firstPage) {
                     productState.page--;
                     renderProductTable();
                 }
@@ -150,16 +149,16 @@
             function renderPager(state, indicator, pagesContainer, prevButton, nextButton, rerender) {
                 let pages = totalPages(state);
                 indicator.textContent = "Página " + state.page + " de " + Math.max(pages, 1);
-                prevButton.disabled = state.page <= 1;
+                prevButton.disabled = state.page <= namespace.Constants.pagination.firstPage;
                 nextButton.disabled = state.page >= pages;
                 pagesContainer.innerHTML = "";
 
-                if (pages <= 1) {
+                if (pages <= namespace.Constants.pagination.firstPage) {
                     return;
                 }
 
-                let start = Math.max(1, state.page - 2);
-                let end = Math.min(pages, state.page + 2);
+                let start = Math.max(namespace.Constants.pagination.firstPage, state.page - namespace.Constants.pagination.pageLinkRadius);
+                let end = Math.min(pages, state.page + namespace.Constants.pagination.pageLinkRadius);
 
                 for (let page = start; page <= end; page++) {
                     let button = document.createElement("button");
@@ -182,18 +181,18 @@
                     return "Mostrando 0 registros.";
                 }
 
-                let start = ((state.page - 1) * state.pageSize) + 1;
-                let end = Math.min(start + state.pageSize - 1, state.items.length);
+                let start = ((state.page - namespace.Constants.pagination.firstPage) * state.pageSize) + namespace.Constants.pagination.firstPage;
+                let end = Math.min(start + state.pageSize - namespace.Constants.pagination.firstPage, state.items.length);
                 return "Mostrando " + start + " a " + end + " de " + state.items.length + " registros totales.";
             }
 
             function slice(state) {
-                let start = (state.page - 1) * state.pageSize;
+                let start = (state.page - namespace.Constants.pagination.firstPage) * state.pageSize;
                 return state.items.slice(start, start + state.pageSize);
             }
 
             function totalPages(state) {
-                return state.items.length === 0 ? 1 : Math.ceil(state.items.length / state.pageSize);
+                return state.items.length === 0 ? namespace.Constants.pagination.firstPage : Math.ceil(state.items.length / state.pageSize);
             }
 
             function renderCustomerRow(row) {

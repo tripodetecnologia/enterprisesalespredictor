@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EnterpriseSalesPredictor.Web.Controllers;
 
 [Authorize]
-[RequirePermission("forecasts:write")]
+[RequirePermission(Permissions.ForecastsWrite)]
 public sealed class ForecastsController : Controller
 {
     private readonly ForecastsApiClient _forecastsApiClient;

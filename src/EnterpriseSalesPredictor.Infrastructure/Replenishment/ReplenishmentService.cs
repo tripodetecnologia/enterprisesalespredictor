@@ -1,3 +1,4 @@
+using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Application.DTOs.Replenishment;
 using EnterpriseSalesPredictor.Application.Interfaces.Auditing;
 using EnterpriseSalesPredictor.Application.Interfaces.Replenishment;
@@ -53,7 +54,7 @@ public sealed class ReplenishmentService : IReplenishmentService
             .ToArray();
 
         var pageNumber = Math.Max(criteria.PageNumber, 1);
-        var pageSize = 10;
+        var pageSize = ReplenishmentPolicy.DefaultPageSize;
         var totalCount = ordered.Length;
 
         return new PagedReplenishmentProjectionResultDto
@@ -90,8 +91,10 @@ public sealed class ReplenishmentService : IReplenishmentService
             .Include(item => item.Product)
             .FirstOrDefaultAsync(item => item.ProductId == command.ProductId && item.RecommendedForMonth == projectionMonth && item.Status == RecommendationStatus.Pending, cancellationToken);
 
-        var rationale = $"Sugerencia enviada a aprobación para {projectionMonth:yyyy-MM}. Stock actual: {command.CurrentStockUnits}. Cantidad recomendada: {command.RecommendedUnits:N0}.";
-        var confidence = command.CurrentStockUnits <= 5 ? 0.82m : 0.72m;
+        var rationale = $"Sugerencia enviada a aprobación para {projectionMonth.ToString(DateFormats.MonthKey)}. Stock actual: {command.CurrentStockUnits}. Cantidad recomendada: {command.RecommendedUnits:N0}.";
+        var confidence = command.CurrentStockUnits <= ReplenishmentPolicy.MinimumStockUnits
+            ? ReplenishmentPolicy.StockoutRiskConfidence
+            : ReplenishmentPolicy.StandardConfidence;
 
         if (existing is not null)
         {
@@ -166,15 +169,15 @@ public sealed class ReplenishmentService : IReplenishmentService
 
         var action = command.Action.Trim().ToLowerInvariant();
 
-        if (action == "approve")
+        if (action == RecommendationReviewActions.Approve)
         {
             recommendation.Approve(command.Reviewer, command.Notes);
         }
-        else if (action == "reject")
+        else if (action == RecommendationReviewActions.Reject)
         {
             recommendation.Reject(command.Reviewer, command.Notes);
         }
-        else if (action == "analysis")
+        else if (action == RecommendationReviewActions.Analysis)
         {
             recommendation.MarkForAnalysis(command.Reviewer, command.Notes);
         }
@@ -191,7 +194,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         await _auditLogService.RecordAsync(new CreateAuditLogCommand
         {
             Actor = command.Reviewer,
-            Action = action == "approve" ? "RecommendationApproved" : action == "reject" ? "RecommendationRejected" : "RecommendationMarkedForAnalysis",
+            Action = action == RecommendationReviewActions.Approve ? "RecommendationApproved" : action == RecommendationReviewActions.Reject ? "RecommendationRejected" : "RecommendationMarkedForAnalysis",
             Module = "Replenishment",
             Details = $"RecommendationId={recommendation.Id}; Notes={command.Notes}"
         }, cancellationToken);
@@ -224,7 +227,7 @@ public sealed class ReplenishmentService : IReplenishmentService
 
         var totalCount = await query.CountAsync(cancellationToken);
         var pageNumber = Math.Max(criteria.PageNumber, 1);
-        var pageSize = 10;
+        var pageSize = ReplenishmentPolicy.DefaultPageSize;
 
         var items = await query
             .OrderBy(item => item.RecommendedForMonth)
@@ -245,7 +248,7 @@ public sealed class ReplenishmentService : IReplenishmentService
 
     private async Task<ReplenishmentProjectionDto?> BuildProjectionAsync(Product product, (DateTime MonthStart, int Days) month, Guid? customerId, CancellationToken cancellationToken)
     {
-        int daysLookBack = 365;
+        int daysLookBack = ReplenishmentPolicy.ProjectionLookbackDays;
         var lookbackStart = month.MonthStart.AddDays(-daysLookBack);
         var salesQuery = _dbContext.Sales.AsNoTracking()
             .Where(item => item.ProductId == product.Id && item.SaleDate >= lookbackStart && item.SaleDate < month.MonthStart);
@@ -262,16 +265,16 @@ public sealed class ReplenishmentService : IReplenishmentService
         var projectedDemand = decimal.Round(averageDailyDemand * month.Days, 2, MidpointRounding.AwayFromZero);
         var availableUnits = product.AvailableUnits;
         var shortage = Math.Max(projectedDemand - availableUnits, 0m);
-        var lowRotation = totalQuantitySold <= 2m;
-        var riskOfStockout = projectedDemand > 0m && availableUnits <= Math.Max(5m, projectedDemand * 0.25m);
+        var lowRotation = totalQuantitySold <= ReplenishmentPolicy.LowRotationUnits;
+        var riskOfStockout = projectedDemand > 0m && availableUnits <= Math.Max(ReplenishmentPolicy.MinimumStockUnits, projectedDemand * ReplenishmentPolicy.StockoutRiskDemandRatio);
 
         if (!ReplenishmentRules.ShouldGenerateRecommendation(projectedDemand, availableUnits) && !riskOfStockout)
         {
             return null;
         }
 
-        var recommendedUnits = decimal.Round(Math.Max(shortage, projectedDemand * 0.15m), 2, MidpointRounding.AwayFromZero);
-        var confidence = lowRotation ? 0.55m : (riskOfStockout ? 0.82m : 0.72m);
+        var recommendedUnits = decimal.Round(Math.Max(shortage, projectedDemand * ReplenishmentPolicy.RecommendedBufferRatio), 2, MidpointRounding.AwayFromZero);
+        var confidence = lowRotation ? ReplenishmentPolicy.LowRotationConfidence : (riskOfStockout ? ReplenishmentPolicy.StockoutRiskConfidence : ReplenishmentPolicy.StandardConfidence);
         var rationale = $"Demanda proyectada {projectedDemand:N0}, stock actual {availableUnits}, sugerencia {recommendedUnits:N0}.";
 
         return new ReplenishmentProjectionDto
@@ -327,7 +330,7 @@ public sealed class ReplenishmentService : IReplenishmentService
             Actor = requestedBy,
             Action = "RecommendationSubmittedForApproval",
             Module = "Replenishment",
-            Details = $"RecommendationId={recommendation.Id}; ProductId={recommendation.ProductId}; Month={recommendation.RecommendedForMonth:yyyy-MM}; RecommendedUnits={recommendation.RecommendedUnits}"
+            Details = $"RecommendationId={recommendation.Id}; ProductId={recommendation.ProductId}; Month={recommendation.RecommendedForMonth.ToString(DateFormats.MonthKey)}; RecommendedUnits={recommendation.RecommendedUnits}"
         }, cancellationToken);
     }
 
@@ -337,7 +340,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         string requestedBy,
         CancellationToken cancellationToken)
     {
-        var lookbackStart = month.MonthStart.AddDays(-90);
+        var lookbackStart = month.MonthStart.AddDays(-ReplenishmentPolicy.RecommendationLookbackDays);
         var sales = await _dbContext.Sales.AsNoTracking()
             .Where(item => item.ProductId == product.Id && item.SaleDate >= lookbackStart && item.SaleDate < month.MonthStart)
             .ToListAsync(cancellationToken);
@@ -348,32 +351,32 @@ public sealed class ReplenishmentService : IReplenishmentService
         var projectedDemand = decimal.Round(averageDailyDemand * month.Days, 2, MidpointRounding.AwayFromZero);
         var availableUnits = product.AvailableUnits;
         var shortage = Math.Max(projectedDemand - availableUnits, 0m);
-        var lowRotation = totalQuantitySold <= 2m;
-        var riskOfStockout = projectedDemand > 0m && availableUnits <= Math.Max(5m, projectedDemand * 0.25m);
+        var lowRotation = totalQuantitySold <= ReplenishmentPolicy.LowRotationUnits;
+        var riskOfStockout = projectedDemand > 0m && availableUnits <= Math.Max(ReplenishmentPolicy.MinimumStockUnits, projectedDemand * ReplenishmentPolicy.StockoutRiskDemandRatio);
 
         if (!ReplenishmentRules.ShouldGenerateRecommendation(projectedDemand, availableUnits) && !riskOfStockout)
         {
             return null;
         }
 
-        var recommendedUnits = decimal.Round(Math.Max(shortage, projectedDemand * 0.15m), 2, MidpointRounding.AwayFromZero);
-        var confidence = lowRotation ? 0.55m : (riskOfStockout ? 0.82m : 0.72m);
+        var recommendedUnits = decimal.Round(Math.Max(shortage, projectedDemand * ReplenishmentPolicy.RecommendedBufferRatio), 2, MidpointRounding.AwayFromZero);
+        var confidence = lowRotation ? ReplenishmentPolicy.LowRotationConfidence : (riskOfStockout ? ReplenishmentPolicy.StockoutRiskConfidence : ReplenishmentPolicy.StandardConfidence);
 
         var rationaleParts = new List<string>
         {
-            $"La demanda proyectada para {month.MonthStart:yyyy-MM} es {projectedDemand:N0} unidades basada en {distinctDays} días activos de venta.",
+            $"La demanda proyectada para {month.MonthStart.ToString(DateFormats.MonthKey)} es {projectedDemand:N0} unidades basada en {distinctDays} días activos de venta.",
             $"El stock disponible actual es {availableUnits} unidades.",
             $"La necesidad estimada de compra es {recommendedUnits:N0} unidades."
         };
 
         if (riskOfStockout)
         {
-            rationaleParts.Add("Se detectó riesgo de agotamiento porque el stock disponible cubre menos del 25% de la demanda proyectada.");
+            rationaleParts.Add($"Se detectó riesgo de agotamiento porque el stock disponible cubre menos del {ReplenishmentPolicy.StockoutRiskDemandRatio:P0} de la demanda proyectada.");
         }
 
         if (lowRotation)
         {
-            rationaleParts.Add("Se detectó baja rotación en los últimos 90 días, por lo que la confianza disminuye y la recomendación debe revisarse con cuidado.");
+            rationaleParts.Add($"Se detectó baja rotación en los últimos {ReplenishmentPolicy.RecommendationLookbackDays} días, por lo que la confianza disminuye y la recomendación debe revisarse con cuidado.");
         }
 
         var monthMarker = new DateTime(month.MonthStart.Year, month.MonthStart.Month, 1);
@@ -406,7 +409,7 @@ public sealed class ReplenishmentService : IReplenishmentService
             Actor = requestedBy,
             Action = "RecommendationGenerated",
             Module = "Replenishment",
-            Details = $"RecommendationId={recommendation.Id}; ProductId={product.Id}; Month={monthMarker:yyyy-MM}; ProjectedDemand={projectedDemand}; AvailableUnits={availableUnits}; RecommendedUnits={recommendedUnits}; Confidence={confidence}"
+            Details = $"RecommendationId={recommendation.Id}; ProductId={product.Id}; Month={monthMarker.ToString(DateFormats.MonthKey)}; ProjectedDemand={projectedDemand}; AvailableUnits={availableUnits}; RecommendedUnits={recommendedUnits}; Confidence={confidence}"
         }, cancellationToken);
 
         return Map(recommendation, product);

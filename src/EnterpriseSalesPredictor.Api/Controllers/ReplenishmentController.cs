@@ -18,7 +18,7 @@ public sealed class ReplenishmentController : ControllerBase
     }
 
     [HttpGet("recommendations")]
-    [Authorize(Policy = "Permission:replenishment:read")]
+    [Authorize(Policy = PermissionPolicies.ReplenishmentRead)]
     public async Task<IActionResult> GetRecommendationsAsync([FromQuery] ReplenishmentQueryCriteria criteria, CancellationToken cancellationToken)
     {
         var result = await _replenishmentService.GetRecommendationsAsync(criteria, cancellationToken);
@@ -26,7 +26,7 @@ public sealed class ReplenishmentController : ControllerBase
     }
 
     [HttpGet("projections")]
-    [Authorize(Policy = "Permission:replenishment:read")]
+    [Authorize(Policy = PermissionPolicies.ReplenishmentRead)]
     public async Task<IActionResult> GetProjectionsAsync([FromQuery] ReplenishmentProjectionQueryCriteria criteria, CancellationToken cancellationToken)
     {
         var result = await _replenishmentService.GetProjectionsAsync(criteria, cancellationToken);
@@ -34,7 +34,7 @@ public sealed class ReplenishmentController : ControllerBase
     }
 
     [HttpPost("recommendations")]
-    [Authorize(Policy = "Permission:replenishment:write")]
+    [Authorize(Policy = PermissionPolicies.ReplenishmentWrite)]
     public async Task<IActionResult> GenerateRecommendationAsync([FromBody] GenerateRecommendationRequest request, CancellationToken cancellationToken)
     {
         if (!request.FromDate.HasValue || !request.ToDate.HasValue)
@@ -53,7 +53,7 @@ public sealed class ReplenishmentController : ControllerBase
     }
 
     [HttpPost("projections/submit")]
-    [Authorize(Policy = "Permission:replenishment:write")]
+    [Authorize(Policy = PermissionPolicies.ReplenishmentWrite)]
     public async Task<IActionResult> SubmitProjectionAsync([FromBody] SubmitProjectionRequest request, CancellationToken cancellationToken)
     {
         var result = await _replenishmentService.SubmitProjectionAsync(new SubmitReplenishmentProjectionCommand
@@ -69,26 +69,26 @@ public sealed class ReplenishmentController : ControllerBase
     }
 
     [HttpPost("recommendations/{id:guid}/approve")]
-    [Authorize(Policy = "Permission:replenishment:write")]
+    [Authorize(Policy = PermissionPolicies.ReplenishmentWrite)]
     public async Task<IActionResult> ApproveRecommendationAsync(Guid id, [FromBody] ReviewRecommendationRequest request, CancellationToken cancellationToken)
     {
-        var result = await ReviewAsync(id, "approve", request, cancellationToken);
+        var result = await ReviewAsync(id, RecommendationReviewActions.Approve, request, cancellationToken);
         return Ok(result);
     }
 
     [HttpPost("recommendations/{id:guid}/reject")]
-    [Authorize(Policy = "Permission:replenishment:write")]
+    [Authorize(Policy = PermissionPolicies.ReplenishmentWrite)]
     public async Task<IActionResult> RejectRecommendationAsync(Guid id, [FromBody] ReviewRecommendationRequest request, CancellationToken cancellationToken)
     {
-        var result = await ReviewAsync(id, "reject", request, cancellationToken);
+        var result = await ReviewAsync(id, RecommendationReviewActions.Reject, request, cancellationToken);
         return Ok(result);
     }
 
     [HttpPost("recommendations/{id:guid}/analysis")]
-    [Authorize(Policy = "Permission:replenishment:write")]
+    [Authorize(Policy = PermissionPolicies.ReplenishmentWrite)]
     public async Task<IActionResult> MarkRecommendationForAnalysisAsync(Guid id, [FromBody] ReviewRecommendationRequest request, CancellationToken cancellationToken)
     {
-        var result = await ReviewAsync(id, "analysis", request, cancellationToken);
+        var result = await ReviewAsync(id, RecommendationReviewActions.Analysis, request, cancellationToken);
         return Ok(result);
     }
 

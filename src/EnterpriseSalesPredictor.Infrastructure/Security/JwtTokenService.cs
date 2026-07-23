@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Application.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -31,7 +32,7 @@ public sealed class JwtTokenService : ITokenService
             new(ClaimTypes.Role, user.Role)
         };
 
-        claims.AddRange(user.Permissions.Select(permission => new Claim("permission", permission)));
+        claims.AddRange(user.Permissions.Select(permission => new Claim(PermissionClaimTypes.Permission, permission)));
 
         var token = new JwtSecurityToken(
             issuer: options.Issuer,

@@ -1,3 +1,4 @@
+using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Application.Interfaces.Uploads;
 using EnterpriseSalesPredictor.Domain.Entities;
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
@@ -362,7 +363,7 @@ public sealed class UploadProcessingService : IUploadProcessingService
             .Select(item => string.Join('|',
                 item.InvoiceNumber,
                 productReferenceById[item.ProductId],
-                item.SaleDate.ToString("yyyy-MM-dd"),
+                item.SaleDate.ToString(DateFormats.HtmlDate),
                 item.SaleAmount.ToString(CultureInfo.InvariantCulture)))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
@@ -372,7 +373,7 @@ public sealed class UploadProcessingService : IUploadProcessingService
         return string.Join('|',
             record.InvoiceNumber,
             record.ProductReference,
-            record.SaleDate.ToString("yyyy-MM-dd"),
+            record.SaleDate.ToString(DateFormats.HtmlDate),
             record.SaleAmount.ToString(System.Globalization.CultureInfo.InvariantCulture));
     }
 }
