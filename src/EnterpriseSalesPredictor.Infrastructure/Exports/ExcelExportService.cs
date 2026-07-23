@@ -90,20 +90,19 @@ public sealed class ExcelExportService : IExportService
             SortDirection = criteria.SortDirection
         }, cancellationToken);
 
-        WriteSalesHeader(worksheet);
+        WriteVisibleSalesHeader(worksheet);
         var row = 2;
         foreach (var sale in sales.Items)
         {
-            worksheet.Cell(row, 1).Value = sale.Id.ToString();
+            worksheet.Cell(row, 1).Value = sale.SaleDate;
             worksheet.Cell(row, 2).Value = sale.InvoiceNumber;
-            worksheet.Cell(row, 3).Value = sale.CustomerId.ToString();
-            worksheet.Cell(row, 4).Value = sale.ProductId.ToString();
-            worksheet.Cell(row, 5).Value = sale.SupplierId.ToString();
-            worksheet.Cell(row, 6).Value = sale.SellerId.ToString();
-            worksheet.Cell(row, 7).Value = sale.SaleDate;
-            worksheet.Cell(row, 8).Value = sale.Quantity;
-            worksheet.Cell(row, 9).Value = sale.SaleAmount;
-            worksheet.Cell(row, 10).Value = sale.PaymentMethod;
+            worksheet.Cell(row, 3).Value = sale.CustomerName;
+            worksheet.Cell(row, 4).Value = sale.ProductName;
+            worksheet.Cell(row, 5).Value = sale.SupplierName;
+            worksheet.Cell(row, 6).Value = sale.SellerName;
+            worksheet.Cell(row, 7).Value = sale.Quantity;
+            worksheet.Cell(row, 8).Value = sale.SaleAmount;
+            worksheet.Cell(row, 9).Value = sale.PaymentMethod;
             row++;
         }
 
@@ -152,20 +151,38 @@ public sealed class ExcelExportService : IExportService
         }
 
         var salesSheet = workbook.Worksheets.Add("Sales");
-        WriteSalesHeader(salesSheet);
+        salesSheet.Cell(1, 1).Value = "Id";
+        salesSheet.Cell(1, 2).Value = "InvoiceNumber";
+        salesSheet.Cell(1, 3).Value = "Customer";
+        salesSheet.Cell(1, 4).Value = "Product";
+        salesSheet.Cell(1, 5).Value = "Supplier";
+        salesSheet.Cell(1, 6).Value = "Seller";
+        salesSheet.Cell(1, 7).Value = "SaleDate";
+        salesSheet.Cell(1, 8).Value = "Quantity";
+        salesSheet.Cell(1, 9).Value = "SaleAmount";
+        salesSheet.Cell(1, 10).Value = "PaymentMethod";
+
+        var sales = await _dbContext.Sales.AsNoTracking()
+            .Join(_dbContext.Customers.AsNoTracking(), sale => sale.CustomerId, customer => customer.Id, (sale, customer) => new { sale, customer })
+            .Join(_dbContext.Products.AsNoTracking(), item => item.sale.ProductId, product => product.Id, (item, product) => new { item.sale, item.customer, product })
+            .Join(_dbContext.Suppliers.AsNoTracking(), item => item.sale.SupplierId, supplier => supplier.Id, (item, supplier) => new { item.sale, item.customer, item.product, supplier })
+            .Join(_dbContext.Sellers.AsNoTracking(), item => item.sale.SellerId, seller => seller.Id, (item, seller) => new { item.sale, item.customer, item.product, item.supplier, seller })
+            .OrderByDescending(item => item.sale.SaleDate)
+            .ToListAsync(cancellationToken);
+
         var saleRow = 2;
-        foreach (var sale in await _dbContext.Sales.AsNoTracking().OrderByDescending(item => item.SaleDate).ToListAsync(cancellationToken))
+        foreach (var item in sales)
         {
-            salesSheet.Cell(saleRow, 1).Value = sale.Id.ToString();
-            salesSheet.Cell(saleRow, 2).Value = sale.InvoiceNumber;
-            salesSheet.Cell(saleRow, 3).Value = sale.CustomerId.ToString();
-            salesSheet.Cell(saleRow, 4).Value = sale.ProductId.ToString();
-            salesSheet.Cell(saleRow, 5).Value = sale.SupplierId.ToString();
-            salesSheet.Cell(saleRow, 6).Value = sale.SellerId.ToString();
-            salesSheet.Cell(saleRow, 7).Value = sale.SaleDate;
-            salesSheet.Cell(saleRow, 8).Value = sale.Quantity;
-            salesSheet.Cell(saleRow, 9).Value = sale.SaleAmount;
-            salesSheet.Cell(saleRow, 10).Value = sale.PaymentMethod;
+            salesSheet.Cell(saleRow, 1).Value = item.sale.Id.ToString();
+            salesSheet.Cell(saleRow, 2).Value = item.sale.InvoiceNumber;
+            salesSheet.Cell(saleRow, 3).Value = item.customer.Name;
+            salesSheet.Cell(saleRow, 4).Value = item.product.Name;
+            salesSheet.Cell(saleRow, 5).Value = item.supplier.Name;
+            salesSheet.Cell(saleRow, 6).Value = item.seller.Name;
+            salesSheet.Cell(saleRow, 7).Value = item.sale.SaleDate;
+            salesSheet.Cell(saleRow, 8).Value = item.sale.Quantity;
+            salesSheet.Cell(saleRow, 9).Value = item.sale.SaleAmount;
+            salesSheet.Cell(saleRow, 10).Value = item.sale.PaymentMethod;
             saleRow++;
         }
 
@@ -189,6 +206,19 @@ public sealed class ExcelExportService : IExportService
         worksheet.Cell(1, 8).Value = "Quantity";
         worksheet.Cell(1, 9).Value = "SaleAmount";
         worksheet.Cell(1, 10).Value = "PaymentMethod";
+    }
+
+    private static void WriteVisibleSalesHeader(IXLWorksheet worksheet)
+    {
+        worksheet.Cell(1, 1).Value = "Fecha de venta";
+        worksheet.Cell(1, 2).Value = "Factura";
+        worksheet.Cell(1, 3).Value = "Cliente";
+        worksheet.Cell(1, 4).Value = "Producto";
+        worksheet.Cell(1, 5).Value = "Proveedor";
+        worksheet.Cell(1, 6).Value = "Vendedor";
+        worksheet.Cell(1, 7).Value = "Cantidad";
+        worksheet.Cell(1, 8).Value = "Monto";
+        worksheet.Cell(1, 9).Value = "Pago";
     }
 
     private static string SanitizeSheetName(string title)

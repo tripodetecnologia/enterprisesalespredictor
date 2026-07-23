@@ -6,7 +6,8 @@
 
 <section class="hero">
     <h1>Auditoría operativa</h1>
-    <p>Revisá eventos de carga, exportación y operación con seguridad aplicada del lado del servidor.</p>
+    <p>Revisa eventos de carga, exportación y operación con seguridad aplicada del lado del servidor.</p>
+    <br />
 
     <form method="get" class="audit-filters">
         <div class="form-group">
@@ -32,18 +33,85 @@
         <button type="submit">Aplicar filtros</button>
     </form>
 </section>
-
+<br />
 <section class="hero">
     <h2>Auditoría de cargas</h2>
+    <br />
     <partial name="_AuditTable" model="Model.UploadLogs" />
+    <div class="page-actions sales-pagination-bar">
+        @if (Model.UploadLogs.PageNumber > 1)
+        {
+            <a class="button button-secondary" asp-action="Index" asp-route-Module="@Model.Filters.Module" asp-route-Actor="@Model.Filters.Actor" asp-route-FromUtc="@Model.Filters.FromUtc?.ToString("s")" asp-route-ToUtc="@Model.Filters.ToUtc?.ToString("s")" asp-route-uploadPage="@(Model.UploadLogs.PageNumber - 1)" asp-route-exportPage="@Model.ExportLogs.PageNumber">Anterior</a>
+        }
+        <span>Página @Model.UploadLogs.PageNumber de @Math.Max(Model.UploadLogs.TotalPages, 1)</span>
+        @if (Model.UploadLogs.PageNumber < Model.UploadLogs.TotalPages)
+        {
+            <a class="button button-secondary" asp-action="Index" asp-route-Module="@Model.Filters.Module" asp-route-Actor="@Model.Filters.Actor" asp-route-FromUtc="@Model.Filters.FromUtc?.ToString("s")" asp-route-ToUtc="@Model.Filters.ToUtc?.ToString("s")" asp-route-uploadPage="@(Model.UploadLogs.PageNumber + 1)" asp-route-exportPage="@Model.ExportLogs.PageNumber">Siguiente</a>
+        }
+    </div>
 </section>
-
+<br />
 <section class="hero">
     <h2>Auditoría de exportaciones</h2>
+    <br />
     <partial name="_AuditTable" model="Model.ExportLogs" />
+    <div class="page-actions sales-pagination-bar">
+        @if (Model.ExportLogs.PageNumber > 1)
+        {
+            <a class="button button-secondary" asp-action="Index" asp-route-Module="@Model.Filters.Module" asp-route-Actor="@Model.Filters.Actor" asp-route-FromUtc="@Model.Filters.FromUtc?.ToString("s")" asp-route-ToUtc="@Model.Filters.ToUtc?.ToString("s")" asp-route-uploadPage="@Model.UploadLogs.PageNumber" asp-route-exportPage="@(Model.ExportLogs.PageNumber - 1)">Anterior</a>
+        }
+        <span>Página @Model.ExportLogs.PageNumber de @Math.Max(Model.ExportLogs.TotalPages, 1)</span>
+        @if (Model.ExportLogs.PageNumber < Model.ExportLogs.TotalPages)
+        {
+            <a class="button button-secondary" asp-action="Index" asp-route-Module="@Model.Filters.Module" asp-route-Actor="@Model.Filters.Actor" asp-route-FromUtc="@Model.Filters.FromUtc?.ToString("s")" asp-route-ToUtc="@Model.Filters.ToUtc?.ToString("s")" asp-route-uploadPage="@Model.UploadLogs.PageNumber" asp-route-exportPage="@(Model.ExportLogs.PageNumber + 1)">Siguiente</a>
+        }
+    </div>
 </section>
-
+<br />
 <section class="hero">
     <h2>Auditoría funcional</h2>
-    <partial name="_AuditTable" model="Model.FunctionalLogs" />
+    <br />
+    @if (Model.FunctionalLogs.TotalCount == 0)
+    {
+        <p>No se encontraron registros de auditoría para esta sección.</p>
+    }
+    else
+    {
+        <p>Mostrando @(((Model.FunctionalLogs.PageNumber - 1) * Model.FunctionalLogs.PageSize) + 1) a @Math.Min(Model.FunctionalLogs.PageNumber * Model.FunctionalLogs.PageSize, Model.FunctionalLogs.TotalCount) de @Model.FunctionalLogs.TotalCount registros.</p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Fecha (UTC)</th>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Módulo</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var entry in Model.FunctionalLogs.Items)
+            {
+                <tr>
+                    <td>@entry.OccurredAtUtc.ToString("u")</td>
+                    <td>@entry.Actor</td>
+                    <td>@entry.Action</td>
+                    <td>@entry.Module</td>
+                    <td>@entry.Details</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        <div class="page-actions sales-pagination-bar">
+            @if (Model.FunctionalLogs.PageNumber > 1)
+            {
+                <a class="button button-secondary" asp-action="Index" asp-route-Module="@Model.Filters.Module" asp-route-Actor="@Model.Filters.Actor" asp-route-FromUtc="@Model.Filters.FromUtc?.ToString("s")" asp-route-ToUtc="@Model.Filters.ToUtc?.ToString("s")" asp-route-uploadPage="@Model.UploadLogs.PageNumber" asp-route-exportPage="@Model.ExportLogs.PageNumber" asp-route-functionalPage="@(Model.FunctionalLogs.PageNumber - 1)">Anterior</a>
+            }
+            <span>Página @Model.FunctionalLogs.PageNumber de @Math.Max(Model.FunctionalLogs.TotalPages, 1)</span>
+            @if (Model.FunctionalLogs.PageNumber < Model.FunctionalLogs.TotalPages)
+            {
+                <a class="button button-secondary" asp-action="Index" asp-route-Module="@Model.Filters.Module" asp-route-Actor="@Model.Filters.Actor" asp-route-FromUtc="@Model.Filters.FromUtc?.ToString("s")" asp-route-ToUtc="@Model.Filters.ToUtc?.ToString("s")" asp-route-uploadPage="@Model.UploadLogs.PageNumber" asp-route-exportPage="@Model.ExportLogs.PageNumber" asp-route-functionalPage="@(Model.FunctionalLogs.PageNumber + 1)">Siguiente</a>
+            }
+        </div>
+    }
 </section>

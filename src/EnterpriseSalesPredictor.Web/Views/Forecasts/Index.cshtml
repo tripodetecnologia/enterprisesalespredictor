@@ -7,8 +7,8 @@
 <section class="hero">
     <h1>Proyección de ventas</h1>
     <p>Selecciona un rango de fechas para proyectar ventas mensuales por cliente y por producto.</p>
-
-    <form id="forecast-form" class="audit-filters">
+    <br />
+    <form id="forecast-form" class="audit-filters filter-panel">
         <div class="form-group">
             <label asp-for="Filters.FromDate">Desde</label>
             <input asp-for="Filters.FromDate" type="date" />
@@ -21,7 +21,7 @@
             <span asp-validation-for="Filters.ToDate" class="field-error"></span>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:5px;">
             <label asp-for="Filters.CustomerId">Cliente</label>
             <select asp-for="Filters.CustomerId">
                 <option value="">Todos los clientes</option>

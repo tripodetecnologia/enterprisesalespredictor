@@ -90,7 +90,7 @@ public sealed class ReplenishmentService : IReplenishmentService
             .Include(item => item.Product)
             .FirstOrDefaultAsync(item => item.ProductId == command.ProductId && item.RecommendedForMonth == projectionMonth && item.Status == RecommendationStatus.Pending, cancellationToken);
 
-        var rationale = $"Sugerencia enviada a aprobación para {projectionMonth:yyyy-MM}. Stock actual: {command.CurrentStockUnits}. Cantidad recomendada: {command.RecommendedUnits:N2}.";
+        var rationale = $"Sugerencia enviada a aprobación para {projectionMonth:yyyy-MM}. Stock actual: {command.CurrentStockUnits}. Cantidad recomendada: {command.RecommendedUnits:N0}.";
         var confidence = command.CurrentStockUnits <= 5 ? 0.82m : 0.72m;
 
         if (existing is not null)
@@ -272,7 +272,7 @@ public sealed class ReplenishmentService : IReplenishmentService
 
         var recommendedUnits = decimal.Round(Math.Max(shortage, projectedDemand * 0.15m), 2, MidpointRounding.AwayFromZero);
         var confidence = lowRotation ? 0.55m : (riskOfStockout ? 0.82m : 0.72m);
-        var rationale = $"Demanda proyectada {projectedDemand:N2}, stock actual {availableUnits}, sugerencia {recommendedUnits:N2}.";
+        var rationale = $"Demanda proyectada {projectedDemand:N0}, stock actual {availableUnits}, sugerencia {recommendedUnits:N0}.";
 
         return new ReplenishmentProjectionDto
         {
@@ -361,9 +361,9 @@ public sealed class ReplenishmentService : IReplenishmentService
 
         var rationaleParts = new List<string>
         {
-            $"La demanda proyectada para {month.MonthStart:yyyy-MM} es {projectedDemand:N2} unidades basada en {distinctDays} días activos de venta.",
+            $"La demanda proyectada para {month.MonthStart:yyyy-MM} es {projectedDemand:N0} unidades basada en {distinctDays} días activos de venta.",
             $"El stock disponible actual es {availableUnits} unidades.",
-            $"La necesidad estimada de compra es {recommendedUnits:N2} unidades."
+            $"La necesidad estimada de compra es {recommendedUnits:N0} unidades."
         };
 
         if (riskOfStockout)

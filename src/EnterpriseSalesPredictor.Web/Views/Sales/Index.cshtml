@@ -6,9 +6,9 @@
 
 <section class="hero">
     <h1>Consulta de ventas</h1>
-    <p>Filtrá registros de ventas y cargá resultados dinámicamente desde la API.</p>
+    <br />
 
-    <form id="sales-query-form" class="audit-filters">
+    <form id="sales-query-form" class="audit-filters filter-panel">
         <div class="form-group">
             <label asp-for="Filters.FromDate">Desde</label>
             <input asp-for="Filters.FromDate" type="date" />
@@ -95,13 +95,13 @@
         </thead>
         <tbody id="sales-results-body">
             <tr>
-                <td colspan="9">Ejecutá una búsqueda para mostrar resultados.</td>
+                <td colspan="9">Ejecuta una búsqueda para mostrar resultados.</td>
             </tr>
         </tbody>
     </table>
 </section>
 
-<partial name="_Modal" model='new ModalViewModel { Id = "sales-export-modal", Title = "Exportar ventas", Message = "¿Querés exportar los resultados filtrados actuales?", ConfirmLabel = "Exportar", CancelLabel = "Cancelar" }' />
+<partial name="_Modal" model='new ModalViewModel { Id = "sales-export-modal", Title = "Exportar ventas", Message = "¿Deseas exportar los resultados filtrados actuales?", ConfirmLabel = "Exportar", CancelLabel = "Cancelar" }' />
 
 @section Scripts {
     <script src="~/js/pages/sales-index.js" asp-append-version="true"></script>

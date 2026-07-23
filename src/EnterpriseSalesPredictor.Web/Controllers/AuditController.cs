@@ -11,6 +11,7 @@ namespace EnterpriseSalesPredictor.Web.Controllers;
 public sealed class AuditController : Controller
 {
     private readonly AuditApiClient _auditApiClient;
+    private const int SectionPageSize = 10;
 
     public AuditController(AuditApiClient auditApiClient)
     {
@@ -18,7 +19,7 @@ public sealed class AuditController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index([FromQuery] AuditFilterViewModel filters, CancellationToken cancellationToken)
+    public async Task<IActionResult> Index([FromQuery] AuditFilterViewModel filters, int uploadPage = 1, int exportPage = 1, int functionalPage = 1, CancellationToken cancellationToken = default)
     {
         var allLogs = await _auditApiClient.GetAuditLogsAsync(cancellationToken);
         var filtered = ApplyFilters(allLogs, filters);
@@ -39,9 +40,9 @@ public sealed class AuditController : Controller
         var viewModel = new AuditPageViewModel
         {
             Filters = filters,
-            UploadLogs = uploadLogs,
-            ExportLogs = exportLogs,
-            FunctionalLogs = functionalLogs
+            UploadLogs = BuildSection(uploadLogs, uploadPage),
+            ExportLogs = BuildSection(exportLogs, exportPage),
+            FunctionalLogs = BuildSection(functionalLogs, functionalPage)
         };
 
         return View(viewModel);
@@ -76,5 +77,21 @@ public sealed class AuditController : Controller
         return query
             .OrderByDescending(log => log.OccurredAtUtc)
             .ToArray();
+    }
+
+    private static PagedAuditSectionViewModel BuildSection(IReadOnlyCollection<AuditLogItemViewModel> items, int pageNumber)
+    {
+        var safePage = Math.Max(pageNumber, 1);
+        var totalCount = items.Count;
+        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)SectionPageSize);
+
+        return new PagedAuditSectionViewModel
+        {
+            Items = items.Skip((safePage - 1) * SectionPageSize).Take(SectionPageSize).ToArray(),
+            PageNumber = safePage,
+            PageSize = SectionPageSize,
+            TotalCount = totalCount,
+            TotalPages = totalPages
+        };
     }
 }

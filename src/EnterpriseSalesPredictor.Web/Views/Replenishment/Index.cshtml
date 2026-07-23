@@ -7,6 +7,7 @@
 <section class="hero">
     <h1>Proyección de abastecimiento</h1>
     <p>Selecciona un rango futuro de meses y, opcionalmente, un cliente o producto para estimar necesidades de compra.</p>
+    <br />
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
@@ -18,7 +19,7 @@
         <div class="auth-error">@Model.ErrorMessage</div>
     }
 
-    <form asp-action="Index" method="get" class="audit-filters">
+    <form asp-action="Index" method="get" class="audit-filters filter-panel">
         <div class="form-group">
             <label asp-for="Filters.FromDate">Desde</label>
             <input asp-for="Filters.FromDate" type="date" />
@@ -63,7 +64,7 @@
 
     @if (!Model.Filters.FromDate.HasValue || !Model.Filters.ToDate.HasValue)
     {
-        <p>Selecciona el rango de fechas y hacé clic en consultar abastecimiento para ver resultados.</p>
+        <p>Selecciona el rango de fechas y haz clic en consultar abastecimiento para ver resultados.</p>
     }
     else if (Model.Results.TotalCount == 0)
     {

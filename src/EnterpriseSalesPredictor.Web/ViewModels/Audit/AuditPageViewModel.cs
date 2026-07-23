@@ -4,9 +4,22 @@ public sealed class AuditPageViewModel
 {
     public AuditFilterViewModel Filters { get; set; } = new();
 
-    public IReadOnlyCollection<AuditLogItemViewModel> UploadLogs { get; set; } = Array.Empty<AuditLogItemViewModel>();
+    public PagedAuditSectionViewModel UploadLogs { get; set; } = new();
 
-    public IReadOnlyCollection<AuditLogItemViewModel> ExportLogs { get; set; } = Array.Empty<AuditLogItemViewModel>();
+    public PagedAuditSectionViewModel ExportLogs { get; set; } = new();
 
-    public IReadOnlyCollection<AuditLogItemViewModel> FunctionalLogs { get; set; } = Array.Empty<AuditLogItemViewModel>();
+    public PagedAuditSectionViewModel FunctionalLogs { get; set; } = new();
+}
+
+public sealed class PagedAuditSectionViewModel
+{
+    public IReadOnlyCollection<AuditLogItemViewModel> Items { get; set; } = Array.Empty<AuditLogItemViewModel>();
+
+    public int PageNumber { get; set; }
+
+    public int PageSize { get; set; }
+
+    public int TotalCount { get; set; }
+
+    public int TotalPages { get; set; }
 }

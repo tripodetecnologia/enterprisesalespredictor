@@ -6,7 +6,8 @@
 
 <section class="hero">
     <h1>Carga de datos de ventas</h1>
-    <p>Cargá archivos Excel o delimitados por punto y coma para incorporar históricos de ventas.</p>
+    <br />
+    <p>Carga archivos Excel o delimitados por punto y coma para incorporar históricos de ventas.</p>
 
     <ul>
         <li>Formatos permitidos: <strong>.xlsx</strong>, <strong>.xls</strong>, <strong>.csv</strong>, <strong>.txt</strong></li>
@@ -28,8 +29,8 @@
         @Html.AntiForgeryToken()
 
         <div class="upload-dropzone" id="upload-dropzone">
-            <p class="upload-dropzone-title">Arrastrá y soltá un archivo acá</p>
-            <p class="upload-dropzone-subtitle">o seleccioná uno desde tu equipo.</p>
+            <p class="upload-dropzone-title">Arrastra y suelta un archivo aquí</p>
+            <p class="upload-dropzone-subtitle">o selecciona uno desde tu equipo.</p>
             <input type="file" name="file" id="upload-file-input" accept=".xlsx,.xls,.csv,.txt" />
         </div>
 

@@ -6,7 +6,8 @@
 
 <section class="hero">
     <h1>Aprobaciones pendientes de abastecimiento</h1>
-    <p>Revisá y resolvé las sugerencias de compra enviadas a aprobación.</p>
+    <p>Revisa las sugerencias de compra enviadas a aprobación.</p>
+    <br />
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
@@ -18,7 +19,7 @@
         <div class="auth-error">@Model.ErrorMessage</div>
     }
 
-    <form asp-action="Index" method="get" class="audit-filters">
+    <form asp-action="Index" method="get" class="audit-filters filter-panel">
         <div class="form-group">
             <label>Desde</label>
             <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" />

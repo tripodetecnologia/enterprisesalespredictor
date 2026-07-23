@@ -6,8 +6,7 @@
 
 <section class="hero">
     <h1>Gestión de accesos</h1>
-    <p>Administrá usuarios, roles y permisos de la plataforma.</p>
-
+    <p>Administrá usuarios, roles y permisos de la plataforma.</p>    
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
         <div class="status-ok">@Model.StatusMessage</div>
@@ -18,7 +17,7 @@
         <div class="auth-error">@Model.ErrorMessage</div>
     }
 </section>
-
+<br />
 <section class="hero access-grid">
     <div>
         <h2>Usuarios</h2>
@@ -82,7 +81,7 @@
         </form>
     </div>
 </section>
-
+<br />
 <section class="hero">
     <h2>Roles y permisos</h2>
 

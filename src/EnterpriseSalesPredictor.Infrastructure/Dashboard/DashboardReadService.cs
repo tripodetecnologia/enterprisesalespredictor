@@ -118,8 +118,8 @@ public sealed class DashboardReadService : IDashboardReadService
             alerts.Add(new DashboardAlertDto
             {
                 Severity = "warning",
-                Title = "No sales in period",
-                Message = "The selected period has no sales transactions to power the dashboard."
+                Title = "Sin ventas en el período",
+                Message = "El periodo seleccionado no tiene transacciones de venta para alimentar el panel."
             });
             return alerts;
         }
@@ -135,8 +135,8 @@ public sealed class DashboardReadService : IDashboardReadService
             alerts.Add(new DashboardAlertDto
             {
                 Severity = "critical",
-                Title = "Low stock detected",
-                Message = $"Product '{product.Name}' has only {product.AvailableUnits} units available."
+                Title = "Stock bajo detectado",
+                Message = $"El producto '{product.Name}' solo tiene {product.AvailableUnits} unidades disponibles."
             });
         }
 
@@ -160,8 +160,8 @@ public sealed class DashboardReadService : IDashboardReadService
                 alerts.Add(new DashboardAlertDto
                 {
                     Severity = "warning",
-                    Title = "Revenue concentration",
-                    Message = $"Customer '{topCustomer.Customer}' represents {share:P0} of sales in the selected period."
+                    Title = "Concentración de ingresos",
+                    Message = $"El cliente '{topCustomer.Customer}' representa el {share:P0} de las ventas en el periodo seleccionado."
                 });
             }
         }
@@ -183,8 +183,8 @@ public sealed class DashboardReadService : IDashboardReadService
             alerts.Add(new DashboardAlertDto
             {
                 Severity = "warning",
-                Title = "Weekly sales slowdown",
-                Message = $"Recent 7-day sales ({recentWeekSales:N2}) are more than 20% below the previous 7-day period ({previousWeekSales:N2})."
+                Title = "Desaceleración semanal de ventas",
+                Message = $"Las ventas de los últimos 7 días ({recentWeekSales:N0}) están más de un 20% por debajo del periodo anterior de 7 días ({previousWeekSales:N0})."
             });
         }
 

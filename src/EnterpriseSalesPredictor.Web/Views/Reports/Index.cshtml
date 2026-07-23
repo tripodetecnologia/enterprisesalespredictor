@@ -6,7 +6,8 @@
 
 <section class="hero">
     <h1>Reportes empresariales</h1>
-    <p>Revisá reportes gerenciales, comerciales, operativos, de abastecimiento y predictivos desde una sola pantalla.</p>
+    <p>Consulta reportes gerenciales, comerciales, operativos, de abastecimiento y predictivos desde una sola pantalla.</p>
+    <br />
     <div class="filter-panel">
         <partial name="_ReportFilters" model="Model.Filters" />
     </div>
@@ -27,8 +28,8 @@
     <partial name="_ReportCard" model="Model.PredictiveReport" />
 </section>
 
-<partial name="_Modal" model='new ModalViewModel { Id = "reports-export-modal", Title = "Exportar reportes", Message = "¿Querés descargar el libro de reportes actual?", ConfirmLabel = "Exportar", CancelLabel = "Cancelar" }' />
-<partial name="_Modal" model='new ModalViewModel { Id = "base-data-export-modal", Title = "Exportar datos base", Message = "¿Querés descargar el libro completo de datos base?", ConfirmLabel = "Descargar", CancelLabel = "Cancelar" }' />
+<partial name="_Modal" model='new ModalViewModel { Id = "reports-export-modal", Title = "Exportar reportes", Message = "¿Deseas descargar el libro de reportes actual?", ConfirmLabel = "Exportar", CancelLabel = "Cancelar" }' />
+<partial name="_Modal" model='new ModalViewModel { Id = "base-data-export-modal", Title = "Exportar datos base", Message = "¿Deseas descargar el libro completo de datos base?", ConfirmLabel = "Descargar", CancelLabel = "Cancelar" }' />
 
 @section Scripts {
     <script src="~/js/pages/reports-index.js" asp-append-version="true"></script>

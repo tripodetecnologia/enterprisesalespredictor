@@ -37,26 +37,16 @@
             <nav class="app-nav">
                 @if (User.Identity?.IsAuthenticated ?? false)
                 {
-                    <a class="@NavClass("Home")" asp-area="" asp-controller="Home" asp-action="Index">Panel</a>                    
-                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "users:read" || claim.Value == "*")))
-                    {
-                        <a class="@NavClass("AccessManagement")" asp-area="" asp-controller="AccessManagement" asp-action="Index">Gestión de accesos</a>
-                    }
-
+                    <a class="@NavClass("Home")" asp-area="" asp-controller="Home" asp-action="Index">Tablero de control</a>
                     @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "uploads:read" || claim.Value == "*")))
                     {
                         <a class="@NavClass("Uploads")" asp-area="" asp-controller="Uploads" asp-action="Index">Cargas</a>
                     }
 
-                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "audit:read" || claim.Value == "*")))
-                    {
-                        <a class="@NavClass("Audit")" asp-area="" asp-controller="Audit" asp-action="Index">Auditoría</a>
-                    }
-
                     @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "sales:read" || claim.Value == "*")))
                     {
                         <a class="@NavClass("Sales")" asp-area="" asp-controller="Sales" asp-action="Index">Consulta de ventas</a>
-                    }
+                    }       
 
                     @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "reports:read" || claim.Value == "*")))
                     {
@@ -65,13 +55,23 @@
 
                     @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "forecasts:write" || claim.Value == "*")))
                     {
-                        <a class="@NavClass("Forecasts")" asp-area="" asp-controller="Forecasts" asp-action="Index">Proyecciones</a>
+                        <a class="@NavClass("Forecasts")" asp-area="" asp-controller="Forecasts" asp-action="Index">Proyecciones de ventas</a>
                     }
 
                     @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "replenishment:read" || claim.Value == "*")))
                     {
                         <a class="@NavClass("Replenishment")" asp-area="" asp-controller="Replenishment" asp-action="Index">Abastecimiento</a>
-                        <a class="@NavClass("ReplenishmentApprovals")" asp-area="" asp-controller="ReplenishmentApprovals" asp-action="Index">Aprobaciones</a>
+                        <a class="@NavClass("ReplenishmentApprovals")" asp-area="" asp-controller="ReplenishmentApprovals" asp-action="Index">Aprobación Abastecimiento</a>
+                    }
+                    
+                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "users:read" || claim.Value == "*")))
+                    {
+                        <a class="@NavClass("AccessManagement")" asp-area="" asp-controller="AccessManagement" asp-action="Index">Gestión de accesos</a>
+                    }
+
+                    @if (User.Claims.Any(claim => claim.Type == "permission" && (claim.Value == "audit:read" || claim.Value == "*")))
+                    {
+                        <a class="@NavClass("Audit")" asp-area="" asp-controller="Audit" asp-action="Index">Auditoría</a>
                     }
                 }
             </nav>
