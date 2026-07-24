@@ -1,4 +1,5 @@
 using EnterpriseSalesPredictor.Application.Constants;
+using EnterpriseSalesPredictor.Application.Interfaces;
 using EnterpriseSalesPredictor.Application.Interfaces.Uploads;
 using EnterpriseSalesPredictor.Domain.Entities;
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
@@ -10,10 +11,12 @@ namespace EnterpriseSalesPredictor.Infrastructure.FileProcessing;
 public sealed class UploadProcessingService : IUploadProcessingService
 {
     private readonly AppDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UploadProcessingService(AppDbContext dbContext)
+    public UploadProcessingService(AppDbContext dbContext, IUnitOfWork unitOfWork)
     {
         _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<UploadProcessingResult> ProcessUploadAsync(
@@ -93,7 +96,7 @@ public sealed class UploadProcessingService : IUploadProcessingService
         var status = invalid > 0 ? UploadProcessStatus.CompletedWithErrors : UploadProcessStatus.Completed;
         upload.Complete(total, insertedRecords, invalid, status);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new UploadProcessingResult
         {

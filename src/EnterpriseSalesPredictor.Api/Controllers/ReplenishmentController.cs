@@ -1,4 +1,5 @@
 using EnterpriseSalesPredictor.Api.Contracts.Replenishment;
+using EnterpriseSalesPredictor.Application.Interfaces.Auditing;
 using EnterpriseSalesPredictor.Application.Interfaces.Replenishment;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,12 @@ namespace EnterpriseSalesPredictor.Api.Controllers;
 public sealed class ReplenishmentController : ControllerBase
 {
     private readonly IReplenishmentService _replenishmentService;
+    private readonly IAuditLogService _auditLogService;
 
-    public ReplenishmentController(IReplenishmentService replenishmentService)
+    public ReplenishmentController(IReplenishmentService replenishmentService, IAuditLogService auditLogService)
     {
         _replenishmentService = replenishmentService;
+        _auditLogService = auditLogService;
     }
 
     [HttpGet("recommendations")]
@@ -30,6 +33,15 @@ public sealed class ReplenishmentController : ControllerBase
     public async Task<IActionResult> GetProjectionsAsync([FromQuery] ReplenishmentProjectionQueryCriteria criteria, CancellationToken cancellationToken)
     {
         var result = await _replenishmentService.GetProjectionsAsync(criteria, cancellationToken);
+
+        await _auditLogService.RecordAsync(new CreateAuditLogCommand
+        {
+            Actor = User.Identity?.Name ?? "system",
+            Action = "ReplenishmentProjectionsViewed",
+            Module = "Replenishment",
+            Details = $"FromDate={criteria.FromDate?.ToString(DateFormats.HtmlDate)}; ToDate={criteria.ToDate?.ToString(DateFormats.HtmlDate)}; CustomerId={criteria.CustomerId}; ProductName={criteria.ProductName}; TotalCount={result.TotalCount}"
+        }, cancellationToken);
+
         return Ok(result);
     }
 

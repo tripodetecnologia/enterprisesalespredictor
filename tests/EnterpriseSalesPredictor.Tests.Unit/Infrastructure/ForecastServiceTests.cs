@@ -4,6 +4,7 @@ using EnterpriseSalesPredictor.Application.Validators;
 using EnterpriseSalesPredictor.Domain.Entities;
 using EnterpriseSalesPredictor.Infrastructure.Forecasting;
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
+using EnterpriseSalesPredictor.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
@@ -20,7 +21,7 @@ public sealed class ForecastServiceTests
         auditLogService.Setup(service => service.RecordAsync(It.IsAny<EnterpriseSalesPredictor.Application.Interfaces.Auditing.CreateAuditLogCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new EnterpriseSalesPredictor.Application.Interfaces.Auditing.AuditLogDto());
 
-        var service = new ForecastService(dbContext, auditLogService.Object);
+        var service = new ForecastService(dbContext, auditLogService.Object, new UnitOfWork(dbContext));
 
         var result = await service.GenerateForecastAsync(new ForecastQuery
         {
@@ -45,7 +46,7 @@ public sealed class ForecastServiceTests
     {
         using var dbContext = CreateDbContext();
         var auditLogService = new Mock<IAuditLogService>();
-        var service = new ForecastService(dbContext, auditLogService.Object);
+        var service = new ForecastService(dbContext, auditLogService.Object, new UnitOfWork(dbContext));
 
         var exception = Assert.ThrowsAsync<ValidationException>(async () => await service.GenerateForecastAsync(new ForecastQuery
         {

@@ -1,3 +1,4 @@
+using EnterpriseSalesPredictor.Application.Interfaces;
 using EnterpriseSalesPredictor.Application.Interfaces.AccessManagement;
 using EnterpriseSalesPredictor.Application.Validators;
 using EnterpriseSalesPredictor.Domain.Entities;
@@ -11,12 +12,14 @@ public sealed class DbAccessManagementService : IAccessManagementService
 {
     private readonly AppDbContext _dbContext;
     private readonly ISecurityBootstrapper _securityBootstrapper;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly PasswordHasher<User> _passwordHasher = new();
 
-    public DbAccessManagementService(AppDbContext dbContext, ISecurityBootstrapper securityBootstrapper)
+    public DbAccessManagementService(AppDbContext dbContext, ISecurityBootstrapper securityBootstrapper, IUnitOfWork unitOfWork)
     {
         _dbContext = dbContext;
         _securityBootstrapper = securityBootstrapper;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IReadOnlyCollection<AccessUserDto>> GetUsersAsync(CancellationToken cancellationToken = default)
@@ -59,9 +62,9 @@ public sealed class DbAccessManagementService : IAccessManagementService
         user.SetPasswordHash(_passwordHasher.HashPassword(user, request.Password));
 
         await _dbContext.Users.AddAsync(user, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         await _dbContext.UserRoles.AddAsync(new UserRole(Guid.NewGuid(), user.Id, role.Id), cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var loaded = await _dbContext.Users
             .AsNoTracking()
@@ -108,7 +111,7 @@ public sealed class DbAccessManagementService : IAccessManagementService
         }
 
         await UpdateRolePermissionsInternalAsync(role, request.Permissions, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new RolePermissionsDto
         {
@@ -136,7 +139,7 @@ public sealed class DbAccessManagementService : IAccessManagementService
 
         role = new Role(Guid.NewGuid(), roleName.Trim());
         await _dbContext.Roles.AddAsync(role, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return role;
     }
 

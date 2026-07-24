@@ -32,7 +32,11 @@ public sealed class UploadsController : ControllerBase
     [Authorize(Policy = PermissionPolicies.UploadsWrite)]
     public async Task<ActionResult<UploadProcessResponse>> UploadExcelAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        ValidateFile(file, UploadPolicy.ExcelExtensions);
+        if (!TryValidateFile(file, UploadPolicy.ExcelExtensions, out var errorMessage))
+        {
+            return BadRequest(new { message = errorMessage });
+        }
+
         var response = await ProcessAsync(file, cancellationToken);
         return Ok(response);
     }
@@ -41,7 +45,11 @@ public sealed class UploadsController : ControllerBase
     [Authorize(Policy = PermissionPolicies.UploadsWrite)]
     public async Task<ActionResult<UploadProcessResponse>> UploadDelimitedAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        ValidateFile(file, UploadPolicy.DelimitedExtensions);
+        if (!TryValidateFile(file, UploadPolicy.DelimitedExtensions, out var errorMessage))
+        {
+            return BadRequest(new { message = errorMessage });
+        }
+
         var response = await ProcessAsync(file, cancellationToken);
         return Ok(response);
     }
@@ -76,7 +84,7 @@ public sealed class UploadsController : ControllerBase
         var parser = _parsers.FirstOrDefault(candidate => candidate.CanHandle(file.FileName));
         if (parser is null)
         {
-            throw new InvalidOperationException("No parser available for the selected file.");
+            throw new InvalidOperationException("No parser available for a validated file.");
         }
 
         await using var stream = file.OpenReadStream();
@@ -108,27 +116,35 @@ public sealed class UploadsController : ControllerBase
         };
     }
 
-    private static void ValidateFile(IFormFile? file, IReadOnlyCollection<string> allowedExtensions)
+    private static bool TryValidateFile(IFormFile? file, IReadOnlyCollection<string> allowedExtensions, out string errorMessage)
     {
+        errorMessage = string.Empty;
+
         if (file is null)
         {
-            throw new InvalidOperationException("A file is required.");
+            errorMessage = "A file is required.";
+            return false;
         }
 
         if (file.Length <= 0)
         {
-            throw new InvalidOperationException("The file is empty.");
+            errorMessage = "The file is empty.";
+            return false;
         }
 
         if (file.Length > UploadPolicy.MaxFileSizeBytes)
         {
-            throw new InvalidOperationException($"The file exceeds the maximum allowed size ({UploadPolicy.MaxFileSizeBytes} bytes).");
+            errorMessage = $"The file exceeds the maximum allowed size ({UploadPolicy.MaxFileSizeBytes} bytes).";
+            return false;
         }
 
         var extension = Path.GetExtension(file.FileName);
         if (!allowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException($"Invalid file extension: {extension}.");
+            errorMessage = $"Invalid file extension: {extension}.";
+            return false;
         }
+
+        return true;
     }
 }

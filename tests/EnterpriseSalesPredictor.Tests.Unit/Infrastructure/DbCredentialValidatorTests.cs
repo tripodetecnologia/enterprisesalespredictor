@@ -1,4 +1,5 @@
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
+using EnterpriseSalesPredictor.Infrastructure.Repositories;
 using EnterpriseSalesPredictor.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -64,6 +65,6 @@ public sealed class DbCredentialValidatorTests
             ]
         });
 
-        return new SecurityBootstrapper(dbContext, new OptionsMonitorStub<AuthSeedOptions>(options.Value));
+        return new SecurityBootstrapper(dbContext, new OptionsMonitorStub<AuthSeedOptions>(options.Value), new UnitOfWork(dbContext));
     }
 }

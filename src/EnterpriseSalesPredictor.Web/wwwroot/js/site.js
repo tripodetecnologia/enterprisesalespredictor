@@ -95,10 +95,8 @@
         }
     }
 
-    window.appUi = {
+    window.EnterpriseSalesPredictor.Modules.appUi = {
         confirm: confirm,
         toast: toast
     };
-
-    window.EnterpriseSalesPredictor.appUi = window.appUi;
 })();

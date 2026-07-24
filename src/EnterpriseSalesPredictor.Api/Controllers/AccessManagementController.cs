@@ -1,4 +1,5 @@
 using EnterpriseSalesPredictor.Api.Contracts.Access;
+using EnterpriseSalesPredictor.Application.Interfaces.Auditing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using IAccessManagementService = EnterpriseSalesPredictor.Application.Interfaces.AccessManagement.IAccessManagementService;
@@ -13,10 +14,12 @@ namespace EnterpriseSalesPredictor.Api.Controllers;
 public sealed class AccessManagementController : ControllerBase
 {
     private readonly IAccessManagementService _accessManagementService;
+    private readonly IAuditLogService _auditLogService;
 
-    public AccessManagementController(IAccessManagementService accessManagementService)
+    public AccessManagementController(IAccessManagementService accessManagementService, IAuditLogService auditLogService)
     {
         _accessManagementService = accessManagementService;
+        _auditLogService = auditLogService;
     }
 
     [HttpGet("users")]
@@ -39,6 +42,14 @@ public sealed class AccessManagementController : ControllerBase
             Permissions = request.Permissions
         }, cancellationToken);
 
+        await _auditLogService.RecordAsync(new CreateAuditLogCommand
+        {
+            Actor = GetActor(),
+            Action = "UserCreated",
+            Module = "AccessManagement",
+            Details = $"Username={user.Username}; Role={user.Role}; Permissions={string.Join(',', user.Permissions)}"
+        }, cancellationToken);
+
         return StatusCode(StatusCodes.Status201Created, user);
     }
 
@@ -54,10 +65,21 @@ public sealed class AccessManagementController : ControllerBase
     [Authorize(Policy = PermissionPolicies.RolesWrite)]
     public async Task<IActionResult> UpdateRolePermissionsAsync([FromBody] UpdateRolePermissionsRequest request, CancellationToken cancellationToken)
     {
+        var previousRole = (await _accessManagementService.GetRolesAsync(cancellationToken))
+            .FirstOrDefault(item => item.Role.Equals(request.Role, StringComparison.OrdinalIgnoreCase));
+
         var role = await _accessManagementService.UpdateRolePermissionsAsync(new UpdateRolePermissionsRequestDto
         {
             Role = request.Role,
             Permissions = request.Permissions
+        }, cancellationToken);
+
+        await _auditLogService.RecordAsync(new CreateAuditLogCommand
+        {
+            Actor = GetActor(),
+            Action = "RolePermissionsUpdated",
+            Module = "AccessManagement",
+            Details = $"Role={role.Role}; PreviousPermissions={string.Join(',', previousRole?.Permissions ?? Array.Empty<string>())}; NewPermissions={string.Join(',', role.Permissions)}"
         }, cancellationToken);
 
         return Ok(role);
@@ -69,5 +91,10 @@ public sealed class AccessManagementController : ControllerBase
     {
         var permissions = await _accessManagementService.GetPermissionCatalogAsync(cancellationToken);
         return Ok(permissions);
+    }
+
+    private string GetActor()
+    {
+        return User.Identity?.Name ?? "system";
     }
 }

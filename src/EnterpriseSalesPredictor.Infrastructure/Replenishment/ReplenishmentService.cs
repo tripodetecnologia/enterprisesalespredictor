@@ -1,5 +1,6 @@
 using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Application.DTOs.Replenishment;
+using EnterpriseSalesPredictor.Application.Interfaces;
 using EnterpriseSalesPredictor.Application.Interfaces.Auditing;
 using EnterpriseSalesPredictor.Application.Interfaces.Replenishment;
 using EnterpriseSalesPredictor.Application.Validators;
@@ -14,11 +15,13 @@ public sealed class ReplenishmentService : IReplenishmentService
 {
     private readonly AppDbContext _dbContext;
     private readonly IAuditLogService _auditLogService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ReplenishmentService(AppDbContext dbContext, IAuditLogService auditLogService)
+    public ReplenishmentService(AppDbContext dbContext, IAuditLogService auditLogService, IUnitOfWork unitOfWork)
     {
         _dbContext = dbContext;
         _auditLogService = auditLogService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<PagedReplenishmentProjectionResultDto> GetProjectionsAsync(ReplenishmentProjectionQueryCriteria criteria, CancellationToken cancellationToken = default)
@@ -99,7 +102,7 @@ public sealed class ReplenishmentService : IReplenishmentService
         if (existing is not null)
         {
             existing.Refresh(command.RecommendedUnits, confidence, rationale);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             await RegisterSubmittedAuditAsync(command.RequestedBy, existing, cancellationToken);
             return Map(existing, product);
         }
@@ -114,7 +117,7 @@ public sealed class ReplenishmentService : IReplenishmentService
             rationale);
 
         await _dbContext.ReplenishmentRecommendations.AddAsync(recommendation, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         await RegisterSubmittedAuditAsync(command.RequestedBy, recommendation, cancellationToken);
         return Map(recommendation, product);
     }
@@ -189,7 +192,7 @@ public sealed class ReplenishmentService : IReplenishmentService
             });
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         await _auditLogService.RecordAsync(new CreateAuditLogCommand
         {
@@ -387,7 +390,15 @@ public sealed class ReplenishmentService : IReplenishmentService
         if (existing is not null)
         {
             existing.Refresh(recommendedUnits, confidence, string.Join(' ', rationaleParts));
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await _auditLogService.RecordAsync(new CreateAuditLogCommand
+            {
+                Actor = requestedBy,
+                Action = "RecommendationRefreshed",
+                Module = "Replenishment",
+                Details = $"RecommendationId={existing.Id}; ProductId={product.Id}; Month={monthMarker.ToString(DateFormats.MonthKey)}; RecommendedUnits={recommendedUnits}; Confidence={confidence}"
+            }, cancellationToken);
 
             return Map(existing, product);
         }
@@ -402,7 +413,7 @@ public sealed class ReplenishmentService : IReplenishmentService
             string.Join(' ', rationaleParts));
 
         await _dbContext.ReplenishmentRecommendations.AddAsync(recommendation, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         await _auditLogService.RecordAsync(new CreateAuditLogCommand
         {

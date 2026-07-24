@@ -3,6 +3,7 @@ using EnterpriseSalesPredictor.Application.Interfaces.Replenishment;
 using EnterpriseSalesPredictor.Application.Validators;
 using EnterpriseSalesPredictor.Domain.Entities;
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
+using EnterpriseSalesPredictor.Infrastructure.Repositories;
 using EnterpriseSalesPredictor.Infrastructure.Replenishment;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -17,7 +18,7 @@ public sealed class ReplenishmentServiceTests
         await using var dbContext = CreateDbContext();
         var productId = SeedReplenishmentData(dbContext);
         var auditLogService = CreateAuditMock();
-        var service = new ReplenishmentService(dbContext, auditLogService.Object);
+        var service = new ReplenishmentService(dbContext, auditLogService.Object, new UnitOfWork(dbContext));
 
         var result = await service.GenerateRecommendationAsync(new GenerateReplenishmentCommand
         {
@@ -40,7 +41,7 @@ public sealed class ReplenishmentServiceTests
         await using var dbContext = CreateDbContext();
         var productId = SeedReplenishmentData(dbContext);
         var auditLogService = CreateAuditMock();
-        var service = new ReplenishmentService(dbContext, auditLogService.Object);
+        var service = new ReplenishmentService(dbContext, auditLogService.Object, new UnitOfWork(dbContext));
         var recommendation = (await service.GenerateRecommendationAsync(new GenerateReplenishmentCommand { FromDate = DateTime.UtcNow.Date, ToDate = DateTime.UtcNow.Date.AddDays(30), RequestedBy = "planner" })).First();
 
         var reviewed = await service.ReviewRecommendationAsync(new ReviewReplenishmentCommand
@@ -65,7 +66,7 @@ public sealed class ReplenishmentServiceTests
         using var dbContext = CreateDbContext();
         var productId = SeedReplenishmentData(dbContext);
         var auditLogService = CreateAuditMock();
-        var service = new ReplenishmentService(dbContext, auditLogService.Object);
+        var service = new ReplenishmentService(dbContext, auditLogService.Object, new UnitOfWork(dbContext));
         var recommendation = service.GenerateRecommendationAsync(new GenerateReplenishmentCommand { FromDate = DateTime.UtcNow.Date, ToDate = DateTime.UtcNow.Date.AddDays(30), RequestedBy = "planner" }).GetAwaiter().GetResult().First();
 
         var exception = Assert.ThrowsAsync<ValidationException>(async () => await service.ReviewRecommendationAsync(new ReviewReplenishmentCommand

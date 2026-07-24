@@ -1,5 +1,6 @@
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
 using EnterpriseSalesPredictor.Domain.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,22 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
     {
         builder.UseEnvironment("Development");
+
+        builder.ConfigureAppConfiguration((_, configuration) =>
+        {
+            configuration.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Authentication:Jwt:Issuer"] = "EnterpriseSalesPredictor.Tests",
+                ["Authentication:Jwt:Audience"] = "EnterpriseSalesPredictor.Tests.Clients",
+                ["Authentication:Jwt:SigningKey"] = "test-signing-key-at-least-32-characters",
+                ["Authentication:Jwt:ExpirationMinutes"] = "120",
+                ["Authentication:Users:Users:0:UserId"] = "22222222222222222222222222222222",
+                ["Authentication:Users:Users:0:Username"] = "devadmin",
+                ["Authentication:Users:Users:0:Password"] = "DevAdmin@123",
+                ["Authentication:Users:Users:0:Role"] = "Administrator",
+                ["Authentication:Users:Users:0:Permissions:0"] = "*"
+            });
+        });
 
         builder.ConfigureServices(services =>
         {

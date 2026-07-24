@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+ApplyDevelopmentConfigurationDefaults(builder);
 
 // Add services to the container.
 
@@ -43,6 +44,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+ValidateStartupConfiguration(app);
 
 using (var scope = app.Services.CreateScope())
 {
@@ -77,5 +80,48 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static void ApplyDevelopmentConfigurationDefaults(WebApplicationBuilder builder)
+{
+    if (!builder.Environment.IsDevelopment())
+    {
+        return;
+    }
+
+    var signingKeyPath = $"{JwtOptions.SectionName}:SigningKey";
+    if (string.IsNullOrWhiteSpace(builder.Configuration[signingKeyPath]))
+    {
+        builder.Configuration[signingKeyPath] = JwtOptions.DevelopmentSigningKey;
+    }
+}
+
+static void ValidateStartupConfiguration(WebApplication app)
+{
+    var jwtOptions = app.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
+    if (string.IsNullOrWhiteSpace(jwtOptions.SigningKey) || jwtOptions.SigningKey.Length < JwtOptions.MinimumSigningKeyLength)
+    {
+        throw new InvalidOperationException($"JWT signing key must be configured with at least {JwtOptions.MinimumSigningKeyLength} characters.");
+    }
+
+    if (app.Environment.IsDevelopment())
+    {
+        return;
+    }
+
+    var connectionString = app.Configuration.GetConnectionString(DatabaseOptions.DefaultConnectionName);
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        throw new InvalidOperationException("A database connection string must be configured outside Development.");
+    }
+
+    var seedOptions = app.Configuration.GetSection(AuthSeedOptions.SectionName).Get<AuthSeedOptions>() ?? new AuthSeedOptions();
+    var unsafeSeedUser = seedOptions.Users.Any(user =>
+        user.Permissions.Contains(PermissionValues.All, StringComparer.OrdinalIgnoreCase) ||
+        user.Password.Equals("Admin@123", StringComparison.Ordinal));
+    if (unsafeSeedUser)
+    {
+        throw new InvalidOperationException("Default administrator credentials or wildcard seed permissions are not allowed outside Development.");
+    }
+}
 
 public partial class Program;

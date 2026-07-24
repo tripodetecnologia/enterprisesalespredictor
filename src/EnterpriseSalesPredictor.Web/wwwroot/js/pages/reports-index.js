@@ -10,13 +10,13 @@
             }
 
             reportsButton.addEventListener("click", async function () {
-                await namespace.appUi.confirm("reports-export-modal", async function () {
+                await namespace.Modules.appUi.confirm("reports-export-modal", async function () {
                     await downloadWithState(reportsButton, "Preparando la exportación de reportes...", buildReportUrl());
                 });
             });
 
             baseDataButton.addEventListener("click", async function () {
-                await namespace.appUi.confirm("base-data-export-modal", async function () {
+                await namespace.Modules.appUi.confirm("base-data-export-modal", async function () {
                     await downloadWithState(baseDataButton, "Preparando la exportación de datos base...", "/Exports/BaseData");
                 });
             });
@@ -30,7 +30,7 @@
 
                     namespace.Modules.downloads.saveBlob(result.blob, result.fileName || namespace.Constants.downloads.exportFileName);
                     namespace.Modules.statePanels.showAlert(statusSection, namespace.Constants.uiVariants.success, "Completado", "La exportación se descargó correctamente.");
-                    namespace.appUi.toast("La exportación se descargó correctamente.", namespace.Constants.uiVariants.success);
+                    namespace.Modules.appUi.toast("La exportación se descargó correctamente.", namespace.Constants.uiVariants.success);
                 } catch (error) {
                     namespace.Modules.statePanels.showAlert(statusSection, namespace.Constants.uiVariants.error, "Exportación fallida", error.message || "La exportación falló.");
                 } finally {

@@ -1,3 +1,4 @@
+using EnterpriseSalesPredictor.Application.Interfaces;
 using EnterpriseSalesPredictor.Application.Interfaces.Auditing;
 using EnterpriseSalesPredictor.Domain.Entities;
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
@@ -8,10 +9,12 @@ namespace EnterpriseSalesPredictor.Infrastructure.Auditing;
 public sealed class AuditLogService : IAuditLogService
 {
     private readonly AppDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public AuditLogService(AppDbContext dbContext)
+    public AuditLogService(AppDbContext dbContext, IUnitOfWork unitOfWork)
     {
         _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<AuditLogDto> RecordAsync(CreateAuditLogCommand command, CancellationToken cancellationToken = default)
@@ -25,7 +28,7 @@ public sealed class AuditLogService : IAuditLogService
             command.Details);
 
         await _dbContext.AuditLogs.AddAsync(entry, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Map(entry);
     }

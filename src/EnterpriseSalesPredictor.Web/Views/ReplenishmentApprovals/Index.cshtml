@@ -4,7 +4,7 @@
     ViewData["Title"] = "Aprobaciones de abastecimiento";
 }
 
-<section class="hero">
+<section class="hero" id="replenishment-approvals-page" data-status-message="@Model.StatusMessage" data-error-message="@Model.ErrorMessage">
     <h1>Aprobaciones pendientes de abastecimiento</h1>
     <p>Revisa las sugerencias de compra enviadas a aprobación.</p>
     <br />
@@ -160,25 +160,5 @@
 </section>
 
 @section Scripts {
-    <script>
-        @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
-        {
-            <text>window.appUi.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StatusMessage)), window.EnterpriseSalesPredictor.Constants.uiVariants.success);</text>
-        }
-
-        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-        {
-            <text>window.appUi.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ErrorMessage)), window.EnterpriseSalesPredictor.Constants.uiVariants.error);</text>
-        }
-
-        document.querySelectorAll('.approval-form').forEach(function (form) {
-            form.addEventListener('submit', function (event) {
-                event.preventDefault();
-                var modalId = form.getAttribute('data-modal-id');
-                window.appUi.confirm(modalId, async function () {
-                    form.submit();
-                });
-            });
-        });
-    </script>
+    <script src="~/js/pages/replenishment-approvals-index.js" asp-append-version="true"></script>
 }

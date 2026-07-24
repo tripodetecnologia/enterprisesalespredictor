@@ -42,7 +42,7 @@
             });
 
             exportButton.addEventListener("click", async function () {
-                await namespace.appUi.confirm("sales-export-modal", async function () {
+                await namespace.Modules.appUi.confirm("sales-export-modal", async function () {
                     exportButton.disabled = true;
                     namespace.Modules.statePanels.showAlert(exportStatus, namespace.Constants.uiVariants.info, "Exportando", "Preparando la exportación de ventas...");
                     namespace.Modules.statePanels.clear(error);
@@ -51,7 +51,7 @@
                         var result = await namespace.Utils.http.fetchBlob("/Exports/FilteredSales?" + buildSearchParams(form).toString());
                         namespace.Modules.downloads.saveBlob(result.blob, result.fileName || namespace.Constants.downloads.salesExportFileName);
                         namespace.Modules.statePanels.showAlert(exportStatus, namespace.Constants.uiVariants.success, "Completado", "La exportación de ventas se descargó correctamente.");
-                        namespace.appUi.toast("La exportación de ventas se descargó correctamente.", namespace.Constants.uiVariants.success);
+                        namespace.Modules.appUi.toast("La exportación de ventas se descargó correctamente.", namespace.Constants.uiVariants.success);
                     } catch (downloadError) {
                         namespace.Modules.statePanels.showAlert(error, namespace.Constants.uiVariants.error, "Exportación fallida", downloadError.message || "Se produjo un error inesperado al exportar las ventas.");
                         namespace.Modules.statePanels.showAlert(exportStatus, namespace.Constants.uiVariants.error, "Exportación fallida", "La exportación de ventas falló.");

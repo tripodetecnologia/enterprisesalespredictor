@@ -1,5 +1,6 @@
 using EnterpriseSalesPredictor.Application.Interfaces.AccessManagement;
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
+using EnterpriseSalesPredictor.Infrastructure.Repositories;
 using EnterpriseSalesPredictor.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -13,7 +14,7 @@ public sealed class DbAccessManagementServiceTests
     {
         await using var dbContext = CreateDbContext();
         var bootstrapper = CreateBootstrapper(dbContext);
-        var service = new DbAccessManagementService(dbContext, bootstrapper);
+        var service = new DbAccessManagementService(dbContext, bootstrapper, new UnitOfWork(dbContext));
 
         var result = await service.CreateUserAsync(new CreateAccessUserRequest
         {
@@ -36,7 +37,7 @@ public sealed class DbAccessManagementServiceTests
     {
         await using var dbContext = CreateDbContext();
         var bootstrapper = CreateBootstrapper(dbContext);
-        var service = new DbAccessManagementService(dbContext, bootstrapper);
+        var service = new DbAccessManagementService(dbContext, bootstrapper, new UnitOfWork(dbContext));
         await service.CreateUserAsync(new CreateAccessUserRequest
         {
             Username = "viewer",
@@ -66,6 +67,6 @@ public sealed class DbAccessManagementServiceTests
     private static SecurityBootstrapper CreateBootstrapper(AppDbContext dbContext)
     {
         var options = Options.Create(new AuthSeedOptions());
-        return new SecurityBootstrapper(dbContext, new OptionsMonitorStub<AuthSeedOptions>(options.Value));
+        return new SecurityBootstrapper(dbContext, new OptionsMonitorStub<AuthSeedOptions>(options.Value), new UnitOfWork(dbContext));
     }
 }

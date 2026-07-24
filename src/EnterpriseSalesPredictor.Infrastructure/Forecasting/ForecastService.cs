@@ -1,5 +1,6 @@
 using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Application.DTOs.Forecasting;
+using EnterpriseSalesPredictor.Application.Interfaces;
 using EnterpriseSalesPredictor.Application.Interfaces.Auditing;
 using EnterpriseSalesPredictor.Application.Interfaces.Forecasting;
 using EnterpriseSalesPredictor.Application.Validators;
@@ -14,11 +15,13 @@ public sealed class ForecastService : IForecastService
 {
     private readonly AppDbContext _dbContext;
     private readonly IAuditLogService _auditLogService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ForecastService(AppDbContext dbContext, IAuditLogService auditLogService)
+    public ForecastService(AppDbContext dbContext, IAuditLogService auditLogService, IUnitOfWork unitOfWork)
     {
         _dbContext = dbContext;
         _auditLogService = auditLogService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<ForecastDto> GenerateForecastAsync(ForecastQuery query, CancellationToken cancellationToken = default)
@@ -90,7 +93,7 @@ public sealed class ForecastService : IForecastService
             query.RequestedBy);
 
         await _dbContext.Forecasts.AddAsync(forecast, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var explanation = $"La proyección distribuye el rango seleccionado por mes y usa promedios diarios calculados sobre los {lookbackDays} días previos para estimar ventas por cliente y ventas/unidades por producto.";
 

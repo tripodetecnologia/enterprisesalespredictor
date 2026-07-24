@@ -1,3 +1,4 @@
+using EnterpriseSalesPredictor.Application.Interfaces;
 using EnterpriseSalesPredictor.Application.Interfaces.Uploads;
 using EnterpriseSalesPredictor.Domain.Entities;
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
@@ -8,10 +9,12 @@ namespace EnterpriseSalesPredictor.Infrastructure.FileProcessing;
 public sealed class UploadService : IUploadService
 {
     private readonly AppDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UploadService(AppDbContext dbContext)
+    public UploadService(AppDbContext dbContext, IUnitOfWork unitOfWork)
     {
         _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<UploadSessionDto> CreateUploadSessionAsync(CreateUploadSessionCommand command, CancellationToken cancellationToken = default)
@@ -25,7 +28,7 @@ public sealed class UploadService : IUploadService
             UploadProcessStatus.Pending);
 
         await _dbContext.UploadedFiles.AddAsync(upload, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Map(upload);
     }

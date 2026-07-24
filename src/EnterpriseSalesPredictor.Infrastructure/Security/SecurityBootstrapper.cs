@@ -1,3 +1,4 @@
+using EnterpriseSalesPredictor.Application.Interfaces;
 using EnterpriseSalesPredictor.Domain.Entities;
 using EnterpriseSalesPredictor.Application.Constants;
 using EnterpriseSalesPredictor.Infrastructure.Persistence;
@@ -11,12 +12,14 @@ public sealed class SecurityBootstrapper : ISecurityBootstrapper
 {
     private readonly AppDbContext _dbContext;
     private readonly IOptionsMonitor<AuthSeedOptions> _authSeedOptions;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly PasswordHasher<User> _passwordHasher = new();
 
-    public SecurityBootstrapper(AppDbContext dbContext, IOptionsMonitor<AuthSeedOptions> authSeedOptions)
+    public SecurityBootstrapper(AppDbContext dbContext, IOptionsMonitor<AuthSeedOptions> authSeedOptions, IUnitOfWork unitOfWork)
     {
         _dbContext = dbContext;
         _authSeedOptions = authSeedOptions;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task EnsureSeededAsync(CancellationToken cancellationToken = default)
@@ -36,7 +39,7 @@ public sealed class SecurityBootstrapper : ISecurityBootstrapper
             user.SetPasswordHash(_passwordHasher.HashPassword(user, seedUser.Password));
 
             await _dbContext.Users.AddAsync(user, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await _dbContext.UserRoles.AddAsync(new UserRole(Guid.NewGuid(), user.Id, role.Id), cancellationToken);
 
@@ -47,7 +50,7 @@ public sealed class SecurityBootstrapper : ISecurityBootstrapper
             await SetRolePermissionsAsync(role, permissions, cancellationToken);
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private async Task EnsurePermissionsAsync(CancellationToken cancellationToken)
@@ -70,7 +73,7 @@ public sealed class SecurityBootstrapper : ISecurityBootstrapper
             await _dbContext.Permissions.AddAsync(new Permission(Guid.NewGuid(), code), cancellationToken);
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private async Task<Role> GetOrCreateRoleAsync(string roleName, CancellationToken cancellationToken)
@@ -83,7 +86,7 @@ public sealed class SecurityBootstrapper : ISecurityBootstrapper
 
         role = new Role(Guid.NewGuid(), roleName.Trim());
         await _dbContext.Roles.AddAsync(role, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return role;
     }
 

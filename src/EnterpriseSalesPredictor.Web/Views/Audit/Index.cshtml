@@ -9,7 +9,7 @@
     <p>Revisa eventos de carga, exportación y operación con seguridad aplicada del lado del servidor.</p>
     <br />
 
-    <form method="get" class="audit-filters">
+    <form method="get" class="audit-filters filter-panel">
         <div class="form-group">
             <label asp-for="Filters.Module">Módulo</label>
             <input asp-for="Filters.Module" />
@@ -30,7 +30,7 @@
             <input asp-for="Filters.ToUtc" type="datetime-local" />
         </div>
 
-        <button type="submit">Aplicar filtros</button>
+        <button type="submit" class="">Aplicar filtros</button>
     </form>
 </section>
 <br />
@@ -71,37 +71,10 @@
 <section class="hero">
     <h2>Auditoría funcional</h2>
     <br />
-    @if (Model.FunctionalLogs.TotalCount == 0)
-    {
-        <p>No se encontraron registros de auditoría para esta sección.</p>
-    }
-    else
-    {
-        <p>Mostrando @(((Model.FunctionalLogs.PageNumber - 1) * Model.FunctionalLogs.PageSize) + 1) a @Math.Min(Model.FunctionalLogs.PageNumber * Model.FunctionalLogs.PageSize, Model.FunctionalLogs.TotalCount) de @Model.FunctionalLogs.TotalCount registros.</p>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Fecha (UTC)</th>
-                    <th>Usuario</th>
-                    <th>Acción</th>
-                    <th>Módulo</th>
-                    <th>Detalle</th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach (var entry in Model.FunctionalLogs.Items)
-            {
-                <tr>
-                    <td>@entry.OccurredAtUtc.ToString("u")</td>
-                    <td>@entry.Actor</td>
-                    <td>@entry.Action</td>
-                    <td>@entry.Module</td>
-                    <td>@entry.Details</td>
-                </tr>
-            }
-            </tbody>
-        </table>
+    <partial name="_AuditTable" model="Model.FunctionalLogs" />
 
+    @if (Model.FunctionalLogs.TotalCount > 0)
+    {
         <div class="page-actions sales-pagination-bar">
             @if (Model.FunctionalLogs.PageNumber > 1)
             {
