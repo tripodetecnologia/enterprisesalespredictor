@@ -30,6 +30,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.SectionName));
+        services.Configure<UploadStorageOptions>(configuration.GetSection(UploadStorageOptions.SectionName));
 
         var connectionString = configuration.GetConnectionString(DatabaseOptions.DefaultConnectionName);
         if (!string.IsNullOrWhiteSpace(connectionString))
@@ -66,6 +67,9 @@ public static class DependencyInjection
         services.AddScoped<IAccessManagementService, DbAccessManagementService>();
         services.AddScoped<IUploadService, UploadService>();
         services.AddScoped<IUploadProcessingService, UploadProcessingService>();
+        services.AddSingleton<IUploadJobQueue, InMemoryUploadJobQueue>();
+        services.AddSingleton<IUploadFileStorage, FileSystemUploadFileStorage>();
+        services.AddHostedService<BackgroundUploadProcessingService>();
         services.AddScoped<IUploadFileParser, ExcelUploadFileParser>();
         services.AddScoped<IUploadFileParser, DelimitedUploadFileParser>();
         services.AddScoped<IAuditLogService, AuditLogService>();

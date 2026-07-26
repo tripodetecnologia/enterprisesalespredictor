@@ -12,11 +12,13 @@ public sealed class UploadProcessingService : IUploadProcessingService
 {
     private readonly AppDbContext _dbContext;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IEnumerable<IUploadFileParser> _parsers;
 
-    public UploadProcessingService(AppDbContext dbContext, IUnitOfWork unitOfWork)
+    public UploadProcessingService(AppDbContext dbContext, IUnitOfWork unitOfWork, IEnumerable<IUploadFileParser> parsers)
     {
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
+        _parsers = parsers;
     }
 
     public async Task<UploadProcessingResult> ProcessUploadAsync(
@@ -26,12 +28,6 @@ public sealed class UploadProcessingService : IUploadProcessingService
         UploadParseResult parseResult,
         CancellationToken cancellationToken = default)
     {
-        var customerCache = await LoadCustomersAsync(parseResult.Records, cancellationToken);
-        var productCache = await LoadProductsAsync(parseResult.Records, cancellationToken);
-        var supplierCache = await LoadSuppliersAsync(parseResult.Records, cancellationToken);
-        var sellerCache = await LoadSellersAsync(parseResult.Records, cancellationToken);
-        var existingSales = await LoadExistingSalesAsync(parseResult.Records, cancellationToken);
-
         var upload = new UploadedFile(
             Guid.NewGuid(),
             fileName,
@@ -41,6 +37,60 @@ public sealed class UploadProcessingService : IUploadProcessingService
             UploadProcessStatus.Processing);
 
         await _dbContext.UploadedFiles.AddAsync(upload, cancellationToken);
+        return await ProcessParsedUploadAsync(upload, parseResult, cancellationToken);
+    }
+
+    public async Task<UploadProcessingResult> ProcessStoredUploadAsync(
+        Guid uploadId,
+        string filePath,
+        string fileName,
+        string fileType,
+        string uploadedBy,
+        CancellationToken cancellationToken = default)
+    {
+        var upload = await _dbContext.UploadedFiles.FirstOrDefaultAsync(entity => entity.Id == uploadId, cancellationToken);
+        if (upload is null)
+        {
+            throw new InvalidOperationException($"Upload session not found: {uploadId}.");
+        }
+
+        upload.StartProcessing();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            var parser = _parsers.FirstOrDefault(candidate => candidate.ParserKey == fileType || candidate.CanHandle(fileName));
+            if (parser is null)
+            {
+                throw new InvalidOperationException($"No parser available for uploaded file: {fileName}.");
+            }
+
+            await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true);
+            var parseResult = await parser.ParseAsync(fileStream, cancellationToken);
+            return await ProcessParsedUploadAsync(upload, parseResult, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch
+        {
+            upload.Fail(0, 0, 0);
+            await _unitOfWork.SaveChangesAsync(CancellationToken.None);
+            throw;
+        }
+    }
+
+    private async Task<UploadProcessingResult> ProcessParsedUploadAsync(
+        UploadedFile upload,
+        UploadParseResult parseResult,
+        CancellationToken cancellationToken)
+    {
+        var customerCache = await LoadCustomersAsync(parseResult.Records, cancellationToken);
+        var productCache = await LoadProductsAsync(parseResult.Records, cancellationToken);
+        var supplierCache = await LoadSuppliersAsync(parseResult.Records, cancellationToken);
+        var sellerCache = await LoadSellersAsync(parseResult.Records, cancellationToken);
+        var existingSales = await LoadExistingSalesAsync(parseResult.Records, cancellationToken);
 
         var errors = parseResult.Errors
             .Select(error => new UploadError(Guid.NewGuid(), upload.Id, error.RowNumber, error.FieldName, error.ErrorMessage))

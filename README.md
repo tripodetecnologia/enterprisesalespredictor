@@ -500,3 +500,5 @@ Entidades principales:
 No se recomienda versionar secretos reales como cadenas de conexion, passwords productivos o claves JWT. En ambientes locales, de prueba y produccion, estos valores deberian configurarse mediante variables de entorno, secretos de usuario, Azure App Service Configuration o un servicio seguro de gestion de secretos.
 
 La URL publica de prueba y las credenciales incluidas en este README corresponden al acceso demo indicado para validar el funcionamiento de la aplicacion desplegada.
+
+Para probar el cargue, se puede utilizar el archivo: ejemplo_excel_cargue_2019.xlsx, que se encuentra en la raiz del repositorio.

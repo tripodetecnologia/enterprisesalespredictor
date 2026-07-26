@@ -43,6 +43,15 @@ public sealed class UploadService : IUploadService
         return uploads.Select(Map).ToArray();
     }
 
+    public async Task<UploadSessionDto?> GetUploadAsync(Guid uploadId, CancellationToken cancellationToken = default)
+    {
+        var upload = await _dbContext.UploadedFiles
+            .AsNoTracking()
+            .FirstOrDefaultAsync(entity => entity.Id == uploadId, cancellationToken);
+
+        return upload is null ? null : Map(upload);
+    }
+
     public async Task<IReadOnlyCollection<UploadErrorDto>> GetUploadErrorsAsync(Guid uploadId, CancellationToken cancellationToken = default)
     {
         var errors = await _dbContext.UploadErrors

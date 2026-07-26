@@ -52,7 +52,7 @@ public sealed class UploadsController : Controller
 
             var viewModel = await BuildPageModelAsync(cancellationToken);
             viewModel.LastResult = result;
-            viewModel.StatusMessage = "La carga se completó correctamente.";
+            viewModel.StatusMessage = "La carga fue recibida y quedó en procesamiento. Actualiza el historial para ver el resultado.";
             return View("Index", viewModel);
         }
         catch (Exception exception)

@@ -12,7 +12,7 @@ public sealed class UploadProcessingServiceTests
     public async Task ProcessUploadAsync_ShouldReuseTrackedEntitiesWithinSameBatch()
     {
         await using var dbContext = CreateDbContext();
-        var service = new UploadProcessingService(dbContext, new UnitOfWork(dbContext));
+        var service = new UploadProcessingService(dbContext, new UnitOfWork(dbContext), Array.Empty<IUploadFileParser>());
 
         var parseResult = new UploadParseResult();
         parseResult.Records.Add(CreateRecord("INV-001", new DateTime(2026, 4, 1), 120m));

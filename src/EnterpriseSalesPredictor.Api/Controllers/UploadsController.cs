@@ -12,19 +12,22 @@ namespace EnterpriseSalesPredictor.Api.Controllers;
 public sealed class UploadsController : ControllerBase
 {
     private readonly IEnumerable<IUploadFileParser> _parsers;
-    private readonly IUploadProcessingService _uploadProcessingService;
     private readonly IUploadService _uploadService;
+    private readonly IUploadFileStorage _uploadFileStorage;
+    private readonly IUploadJobQueue _uploadJobQueue;
     private readonly IAuditLogService _auditLogService;
 
     public UploadsController(
         IEnumerable<IUploadFileParser> parsers,
-        IUploadProcessingService uploadProcessingService,
         IUploadService uploadService,
+        IUploadFileStorage uploadFileStorage,
+        IUploadJobQueue uploadJobQueue,
         IAuditLogService auditLogService)
     {
         _parsers = parsers;
-        _uploadProcessingService = uploadProcessingService;
         _uploadService = uploadService;
+        _uploadFileStorage = uploadFileStorage;
+        _uploadJobQueue = uploadJobQueue;
         _auditLogService = auditLogService;
     }
 
@@ -37,8 +40,8 @@ public sealed class UploadsController : ControllerBase
             return BadRequest(new { message = errorMessage });
         }
 
-        var response = await ProcessAsync(file, cancellationToken);
-        return Ok(response);
+        var response = await QueueAsync(file, UploadPolicy.ExcelParserKey, cancellationToken);
+        return Accepted($"/api/uploads/{response.UploadId}", response);
     }
 
     [HttpPost("delimited")]
@@ -50,8 +53,8 @@ public sealed class UploadsController : ControllerBase
             return BadRequest(new { message = errorMessage });
         }
 
-        var response = await ProcessAsync(file, cancellationToken);
-        return Ok(response);
+        var response = await QueueAsync(file, UploadPolicy.DelimitedParserKey, cancellationToken);
+        return Accepted($"/api/uploads/{response.UploadId}", response);
     }
 
     [HttpGet]
@@ -71,6 +74,14 @@ public sealed class UploadsController : ControllerBase
         return Ok(uploads);
     }
 
+    [HttpGet("{uploadId:guid}")]
+    [Authorize(Policy = PermissionPolicies.UploadsRead)]
+    public async Task<IActionResult> GetUploadAsync(Guid uploadId, CancellationToken cancellationToken)
+    {
+        var upload = await _uploadService.GetUploadAsync(uploadId, cancellationToken);
+        return upload is null ? NotFound() : Ok(upload);
+    }
+
     [HttpGet("{uploadId:guid}/errors")]
     [Authorize(Policy = PermissionPolicies.UploadsRead)]
     public async Task<IActionResult> GetUploadErrorsAsync(Guid uploadId, CancellationToken cancellationToken)
@@ -79,40 +90,46 @@ public sealed class UploadsController : ControllerBase
         return Ok(errors);
     }
 
-    private async Task<UploadProcessResponse> ProcessAsync(IFormFile file, CancellationToken cancellationToken)
+    private async Task<UploadProcessResponse> QueueAsync(IFormFile file, string fileType, CancellationToken cancellationToken)
     {
-        var parser = _parsers.FirstOrDefault(candidate => candidate.CanHandle(file.FileName));
+        var parser = _parsers.FirstOrDefault(candidate => candidate.ParserKey == fileType && candidate.CanHandle(file.FileName));
         if (parser is null)
         {
             throw new InvalidOperationException("No parser available for a validated file.");
         }
 
-        await using var stream = file.OpenReadStream();
-        var parseResult = await parser.ParseAsync(stream, cancellationToken);
-
         var uploadedBy = User.Identity?.Name ?? "system";
-        var result = await _uploadProcessingService.ProcessUploadAsync(
-            file.FileName,
-            parser.ParserKey,
-            uploadedBy,
-            parseResult,
-            cancellationToken);
+        var uploadSession = await _uploadService.CreateUploadSessionAsync(new CreateUploadSessionCommand
+        {
+            FileName = file.FileName,
+            FileType = parser.ParserKey,
+            UploadedBy = uploadedBy
+        }, cancellationToken);
+
+        await using var stream = file.OpenReadStream();
+        var filePath = await _uploadFileStorage.SaveAsync(uploadSession.Id, file.FileName, stream, cancellationToken);
+
+        await _uploadJobQueue.EnqueueAsync(new UploadProcessingJob
+        {
+            UploadId = uploadSession.Id,
+            FilePath = filePath,
+            FileName = file.FileName,
+            FileType = parser.ParserKey,
+            UploadedBy = uploadedBy
+        }, cancellationToken);
 
         await _auditLogService.RecordAsync(new CreateAuditLogCommand
         {
             Actor = uploadedBy,
-            Action = "UploadProcessed",
+            Action = "UploadQueued",
             Module = "Uploads",
-            Details = $"UploadId={result.UploadId}; File={file.FileName}; Status={result.Status}; Total={result.TotalRecords}; Valid={result.ValidRecords}; Invalid={result.InvalidRecords}"
+            Details = $"UploadId={uploadSession.Id}; File={file.FileName}; Type={parser.ParserKey}"
         }, cancellationToken);
 
         return new UploadProcessResponse
         {
-            UploadId = result.UploadId,
-            TotalRecords = result.TotalRecords,
-            ValidRecords = result.ValidRecords,
-            InvalidRecords = result.InvalidRecords,
-            Status = result.Status
+            UploadId = uploadSession.Id,
+            Status = uploadSession.Status
         };
     }
 

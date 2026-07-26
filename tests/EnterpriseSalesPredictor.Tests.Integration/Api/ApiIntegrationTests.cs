@@ -97,7 +97,7 @@ public sealed class ApiIntegrationTests
     }
 
     [Test]
-    public async Task UploadDelimitedEndpoint_ShouldPersistImportedData()
+    public async Task UploadDelimitedEndpoint_ShouldQueueImport()
     {
         await AuthenticateAsync();
 
@@ -113,8 +113,9 @@ public sealed class ApiIntegrationTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(payload.GetProperty("validRecords").GetInt32(), Is.GreaterThanOrEqualTo(1));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Accepted));
+            Assert.That(payload.GetProperty("uploadId").GetGuid(), Is.Not.EqualTo(Guid.Empty));
+            Assert.That(payload.GetProperty("status").GetString(), Is.EqualTo("Pending"));
             Assert.That(dbContext.UploadedFiles.Count(), Is.GreaterThanOrEqualTo(1));
         });
     }
@@ -129,7 +130,7 @@ public sealed class ApiIntegrationTests
 
         var response = await _client.PostAsync("api/uploads/excel", content);
 
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Accepted));
     }
 
     [Test]

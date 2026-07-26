@@ -6,5 +6,6 @@ public enum UploadProcessStatus
     Processing = 1,
     Completed = 2,
     CompletedWithErrors = 3,
-    Rejected = 4
+    Rejected = 4,
+    Failed = 5
 }

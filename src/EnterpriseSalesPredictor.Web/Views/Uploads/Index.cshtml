@@ -45,24 +45,19 @@
 @if (Model.LastResult is not null)
 {
     <section class="hero">
-        <h2>Último resumen de procesamiento</h2>
+        <h2>Última carga recibida</h2>
+        <p>El archivo se procesará en segundo plano. Consulta el historial para ver el estado final.</p>
         <table class="data-table">
             <thead>
                 <tr>
                     <th>ID de carga</th>
                     <th>Estado</th>
-                    <th>Total</th>
-                    <th>Válidos</th>
-                    <th>Inválidos</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>@Model.LastResult.UploadId</td>
                     <td>@Model.LastResult.Status</td>
-                    <td>@Model.LastResult.TotalRecords</td>
-                    <td>@Model.LastResult.ValidRecords</td>
-                    <td>@Model.LastResult.InvalidRecords</td>
                 </tr>
             </tbody>
         </table>

@@ -34,11 +34,21 @@ public sealed class UploadedFile : Entity
 
     public int InvalidRecords { get; private set; }
 
+    public void StartProcessing()
+    {
+        Status = UploadProcessStatus.Processing;
+    }
+
     public void Complete(int totalRecords, int validRecords, int invalidRecords, UploadProcessStatus status)
     {
         TotalRecords = totalRecords;
         ValidRecords = validRecords;
         InvalidRecords = invalidRecords;
         Status = status;
+    }
+
+    public void Fail(int totalRecords, int validRecords, int invalidRecords)
+    {
+        Complete(totalRecords, validRecords, invalidRecords, UploadProcessStatus.Failed);
     }
 }
