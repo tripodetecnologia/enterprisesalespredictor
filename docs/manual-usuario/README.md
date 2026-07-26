@@ -4,36 +4,6 @@ Enterprise Sales Predictor es una plataforma web para cargar historicos de venta
 
 Este manual explica el uso de los modulos disponibles para usuarios finales. Las opciones visibles pueden variar segun los permisos asignados a cada perfil.
 
-## Como Completar Las Imagenes
-
-Guarda las capturas de pantalla en esta carpeta:
-
-```text
-docs/manual-usuario/images/
-```
-
-Usa exactamente los nombres indicados en cada seccion. Si una imagen no aparece en el manual, verifica que el archivo exista y que el nombre coincida, incluyendo extension `.png`.
-
-## Imagenes Requeridas
-
-| Archivo | Captura requerida |
-|---------|-------------------|
-| `01-login.png` | Pantalla completa de inicio de sesion antes de ingresar credenciales. |
-| `02-menu-lateral.png` | Pantalla autenticada donde se vea claramente el menu lateral con los modulos disponibles. |
-| `03-tablero-control.png` | Panel ejecutivo con KPIs, mejores clientes/productos, accesos rapidos y alertas. |
-| `04-carga-archivos.png` | Modulo Cargas mostrando zona de carga, formatos permitidos y boton Procesar carga. |
-| `05-historial-cargas.png` | Seccion Historial de cargas con registros y accion Ver errores. |
-| `06-consulta-ventas.png` | Modulo Consulta de ventas con filtros, tabla de resultados y boton de exportacion. |
-| `07-reportes.png` | Modulo Reportes con filtros, tarjetas de reportes y botones de exportacion. |
-| `08-proyeccion-ventas.png` | Modulo Proyeccion de ventas con formulario Desde, Hasta, Producto y Cliente. |
-| `09-resultados-proyeccion.png` | Resultados de proyeccion con resumen general y tablas por cliente/producto. |
-| `10-abastecimiento.png` | Modulo Proyeccion de abastecimiento con filtros y resultado proyectado. |
-| `11-aprobacion-abastecimiento.png` | Listado pendiente de aprobaciones con acciones Aprobar, Rechazar y Analisis. |
-| `12-detalle-recomendacion.png` | Detalle de una recomendacion de abastecimiento y acciones de revision. |
-| `13-gestion-accesos.png` | Gestion de accesos con usuarios, creacion de usuario, roles y permisos. |
-| `14-auditoria.png` | Auditoria operativa con filtros y tablas de auditoria de cargas, exportaciones y funcional. |
-| `15-cierre-sesion.png` | Encabezado superior con usuario conectado y boton Cerrar sesion. |
-
 ## Acceso Al Sistema
 
 1. Abre la URL de la aplicacion web.
