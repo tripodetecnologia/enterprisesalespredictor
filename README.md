@@ -19,6 +19,12 @@ Credenciales de prueba:
 | Usuario | `admin` |
 | Contrasena | `bigadmin@123` |
 
+## Manual de Usuario
+
+El manual de uso de la aplicación está disponible en:
+
+[Ver Manual de Usuario](docs/manual-usuario/README.md)
+
 ## Descripcion General
 
 El proyecto implementa una solucion empresarial orientada a la toma de decisiones comerciales y operativas. Su objetivo principal es centralizar historicos de ventas y convertirlos en informacion util para analisis, reportes, forecasting y abastecimiento.
