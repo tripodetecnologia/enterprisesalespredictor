@@ -9,6 +9,7 @@
 *.userosscache
 *.sln.docstates
 *.slnLaunch.user
+*.pubxml
 
 # Test / coverage / logs
 TestResults/

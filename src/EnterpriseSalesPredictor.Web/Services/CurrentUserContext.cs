@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using EnterpriseSalesPredictor.Application.Constants;
 
 namespace EnterpriseSalesPredictor.Web.Services;
 

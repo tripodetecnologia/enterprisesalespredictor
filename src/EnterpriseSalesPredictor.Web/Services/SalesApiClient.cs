@@ -1,8 +1,7 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Security.Claims;
 using EnterpriseSalesPredictor.Web.ViewModels.Sales;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Net.Http.Headers;
+using System.Security.Claims;
 
 namespace EnterpriseSalesPredictor.Web.Services;
 

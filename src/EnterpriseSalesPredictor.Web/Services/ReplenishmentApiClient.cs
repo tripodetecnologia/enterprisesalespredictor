@@ -1,10 +1,9 @@
+using EnterpriseSalesPredictor.Web.ViewModels.Forecasting;
+using EnterpriseSalesPredictor.Web.ViewModels.Replenishment;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
-using EnterpriseSalesPredictor.Web.ViewModels.Replenishment;
-using EnterpriseSalesPredictor.Web.ViewModels.Forecasting;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace EnterpriseSalesPredictor.Web.Services;
 
